@@ -4,7 +4,7 @@
 // REQUIRES: valid_xchess_license
 // REQUIRES: peano
 // RUN: mkdir -p %t/data; cd %t
-// RUN: aie-opt %s %vector-to-llvmir% -o llvmir.mlir
+// RUN: aie-opt %s %aievec-to-llvmir% -o llvmir.mlir
 // RUN: aie-translate llvmir.mlir %llvmir-to-ll% -o mlir-part.ll
 // RUN: cp %S/dut_simple.ll .
 // RUN: cp %S/lut_based_ops.ll .
@@ -29,7 +29,7 @@ module {
     scf.for %arg2 = %c0 to %c1024 step %c16 {
       %0 = vector.transfer_read %arg0[%arg2], %cst {in_bounds = [true]} : memref<1024xbf16>, vector<16xbf16>
       %1 = func.call @_Z10getExpBf16Dv16_u6__bf16(%0) : (vector<16xbf16>) -> vector<8xi64>
-      %4 = func.call @llvm.aie2.v16accfloat.to.v16bf16(%1) : (vector<8xi64>)->vector<16xbf16>
+      %4 = func.call @llvm.aie2.v16accfloat.to.v16bf16(%1) : (vector<8xi64>) -> vector<16xbf16>
       vector.transfer_write %4, %arg1[%arg2] {in_bounds = [true]} : vector<16xbf16>, memref<1024xbf16>
     }
     return

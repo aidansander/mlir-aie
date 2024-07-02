@@ -5,33 +5,33 @@ declare <8 x i64> @_Z10getExpBf16Dv16_u6__bf16(<16 x bfloat>)
 
 declare <16 x bfloat> @llvm.aie2.v16accfloat.to.v16bf16(<8 x i64>)
 
-define void @dut(ptr %0, ptr %1, i64 %2, i64 %3, i64 %4, ptr %5, ptr %6, i64 %7, i64 %8, i64 %9) {
-  %11 = ptrtoint ptr %1 to i64
-  %12 = and i64 %11, 31
-  %13 = icmp eq i64 %12, 0
-  call void @llvm.assume(i1 %13)
-  %14 = ptrtoint ptr %6 to i64
-  %15 = and i64 %14, 31
-  %16 = icmp eq i64 %15, 0
-  call void @llvm.assume(i1 %16)
-  br label %17
+define void @dut(ptr %0, ptr %1) {
+  %3 = ptrtoint ptr %0 to i64
+  %4 = and i64 %3, 31
+  %5 = icmp eq i64 %4, 0
+  call void @llvm.assume(i1 %5)
+  %6 = ptrtoint ptr %1 to i64
+  %7 = and i64 %6, 31
+  %8 = icmp eq i64 %7, 0
+  call void @llvm.assume(i1 %8)
+  br label %9
 
-17:                                               ; preds = %20, %10
-  %18 = phi i64 [ %26, %20 ], [ 0, %10 ]
-  %19 = icmp slt i64 %18, 1024
-  br i1 %19, label %20, label %27
+9:                                                ; preds = %12, %2
+  %10 = phi i64 [ %18, %12 ], [ 0, %2 ]
+  %11 = icmp slt i64 %10, 1024
+  br i1 %11, label %12, label %19
 
-20:                                               ; preds = %17
-  %21 = getelementptr bfloat, ptr %1, i64 %18
-  %22 = load <16 x bfloat>, ptr %21, align 2
-  %23 = call <8 x i64> @_Z10getExpBf16Dv16_u6__bf16(<16 x bfloat> %22)
-  %24 = call <16 x bfloat> @llvm.aie2.v16accfloat.to.v16bf16(<8 x i64> %23)
-  %25 = getelementptr bfloat, ptr %6, i64 %18
-  store <16 x bfloat> %24, ptr %25, align 2
-  %26 = add i64 %18, 16
-  br label %17
+12:                                               ; preds = %9
+  %13 = getelementptr bfloat, ptr %0, i64 %10
+  %14 = load <16 x bfloat>, ptr %13, align 2
+  %15 = call <8 x i64> @_Z10getExpBf16Dv16_u6__bf16(<16 x bfloat> %14)
+  %16 = call <16 x bfloat> @llvm.aie2.v16accfloat.to.v16bf16(<8 x i64> %15)
+  %17 = getelementptr bfloat, ptr %1, i64 %10
+  store <16 x bfloat> %16, ptr %17, align 2
+  %18 = add i64 %10, 16
+  br label %9
 
-27:                                               ; preds = %17
+19:                                               ; preds = %9
   ret void
 }
 

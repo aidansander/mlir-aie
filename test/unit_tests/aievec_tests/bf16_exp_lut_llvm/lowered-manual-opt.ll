@@ -1,43 +1,46 @@
 ; ModuleID = 'lowered.ll'
 source_filename = "LLVMDialectModule"
 
-declare <8 x i64> @_Z10getExpBf16Dv16_u6__bf16(<16 x bfloat>) local_unnamed_addr
+declare <8 x i64> @_Z10getExpBf16Dv16_u6__bf16(<16 x bfloat>)
 
-; Function Attrs: nofree nounwind memory(inaccessiblemem: read)
+; Function Attrs: nounwind memory(inaccessiblemem: read)
 declare <16 x bfloat> @llvm.aie2.v16accfloat.to.v16bf16(<8 x i64>) #0
 
-define void @dut(ptr nocapture readnone %0, ptr noalias %1, i64 %2, i64 %3, i64 %4, ptr nocapture readnone %5, ptr noalias %6, i64 %7, i64 %8, i64 %9) local_unnamed_addr {
-  %11 = ptrtoint ptr %1 to i64
-  %12 = and i64 %11, 31
-  %13 = icmp eq i64 %12, 0
-  tail call void @llvm.assume(i1 %13)
-  %14 = ptrtoint ptr %6 to i64
-  %15 = and i64 %14, 31
-  %16 = icmp eq i64 %15, 0
-  tail call void @llvm.assume(i1 %16)
-  br label %17
+define void @dut(ptr noalias %0, ptr noalias %1) {
+  %3 = ptrtoint ptr %0 to i64
+  %4 = and i64 %3, 31
+  %5 = icmp eq i64 %4, 0
+  call void @llvm.assume(i1 %5)
+  %6 = ptrtoint ptr %1 to i64
+  %7 = and i64 %6, 31
+  %8 = icmp eq i64 %7, 0
+  call void @llvm.assume(i1 %8)
+  br label %9
 
-17:                                               ; preds = %10, %17
-  %18 = phi i64 [ 0, %10 ], [ %24, %17 ]
-  %19 = getelementptr bfloat, ptr %1, i64 %18
-  %20 = load <16 x bfloat>, ptr %19, align 32
-  %21 = tail call <8 x i64> @_Z10getExpBf16Dv16_u6__bf16(<16 x bfloat> %20)
-  %22 = tail call <16 x bfloat> @llvm.aie2.v16accfloat.to.v16bf16(<8 x i64> %21)
-  %23 = getelementptr bfloat, ptr %6, i64 %18
-  store <16 x bfloat> %22, ptr %23, align 32
-  %24 = add nuw nsw i64 %18, 16
-  %25 = icmp ult i64 %18, 1008
-  br i1 %25, label %17, label %26
+9:                                                ; preds = %12, %2
+  %10 = phi i64 [ %18, %12 ], [ 0, %2 ]
+  %11 = icmp slt i64 %10, 1024
+  br i1 %11, label %12, label %19
 
-26:                                               ; preds = %17
+12:                                               ; preds = %9
+  %13 = getelementptr bfloat, ptr %0, i64 %10
+  %14 = load <16 x bfloat>, ptr %13, align 2
+  %15 = call <8 x i64> @_Z10getExpBf16Dv16_u6__bf16(<16 x bfloat> %14)
+  %16 = call <16 x bfloat> @llvm.aie2.v16accfloat.to.v16bf16(<8 x i64> %15)
+  %17 = getelementptr bfloat, ptr %1, i64 %10
+  store <16 x bfloat> %16, ptr %17, align 2
+  %18 = add i64 %10, 16
+  br label %9
+
+19:                                               ; preds = %9
   ret void
 }
 
-; Function Attrs: mustprogress nocallback nofree nosync nounwind willreturn memory(inaccessiblemem: write)
+; Function Attrs: nocallback nofree nosync nounwind willreturn memory(inaccessiblemem: write)
 declare void @llvm.assume(i1 noundef) #1
 
-attributes #0 = { nofree nounwind memory(inaccessiblemem: read) }
-attributes #1 = { mustprogress nocallback nofree nosync nounwind willreturn memory(inaccessiblemem: write) }
+attributes #0 = { nounwind memory(inaccessiblemem: read) }
+attributes #1 = { nocallback nofree nosync nounwind willreturn memory(inaccessiblemem: write) }
 
 !llvm.module.flags = !{!0}
 

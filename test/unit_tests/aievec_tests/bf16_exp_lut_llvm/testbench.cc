@@ -5,12 +5,18 @@
 #include <cstdio>
 #include <cstdlib>
 
+//extern "C" {
+//void dut(bfloat16 *in0_allocated, bfloat16 *in0_aligned, int64_t in0_offset,
+         //int64_t in0_sizes_0, int64_t in0_strides_0, 
+         //bfloat16 *out0_allocated, bfloat16 *out0_aligned,
+         //int64_t out0_offset, int64_t out0_sizes_0, int64_t out0_strides_0);
+//}
+
+
 extern "C" {
-void dut(bfloat16 *in0_allocated, bfloat16 *in0_aligned, int64_t in0_offset,
-         int64_t in0_sizes_0, int64_t in0_strides_0, 
-         bfloat16 *out0_allocated, bfloat16 *out0_aligned,
-         int64_t out0_offset, int64_t out0_sizes_0, int64_t out0_strides_0);
+    void dut(bfloat16 *restrict in0, bfloat16 *restrict out0);
 }
+
 void dut_ref(bfloat16 *in0, bfloat16 *out0);
 
 alignas(32) bfloat16 g_in0[IN0_SIZE];
@@ -27,7 +33,7 @@ int main(int argc, char *argv[]) {
 
   chess_memory_fence();
   auto cyclesBegin = chess_cycle_count();
-  dut(g_in0, g_in0, 0, 0, 0, g_out0, g_out0, 0, 0, 0);
+  dut(g_in0, g_out0);
   auto cyclesEnd = chess_cycle_count();
   chess_memory_fence();
 
