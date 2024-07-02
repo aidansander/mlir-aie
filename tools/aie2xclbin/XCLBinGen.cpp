@@ -9,6 +9,7 @@
 //===---------------------------------------------------------------------===//
 
 #include "XCLBinGen.h"
+#include <fstream>
 
 #include "aie/Conversion/AIEVecToLLVM/AIEVecToLLVM.h"
 #include "aie/Dialect/AIE/Transforms/AIEPasses.h"
@@ -40,6 +41,7 @@
 #include "llvm/Support/Program.h"
 #include "llvm/Support/ToolOutputFile.h"
 
+#include <optional>
 #include <regex>
 #include <sstream>
 #include <unordered_map>
@@ -162,9 +164,9 @@ static void addAIELoweringPasses(OpPassManager &pm) {
   pm.addPass(AIE::createAIECanonicalizeDevicePass());
   OpPassManager &devicePM = pm.nest<AIE::DeviceOp>();
   devicePM.addPass(AIE::createAIEAssignLockIDsPass());
-  devicePM.addPass(AIE::createAIEAssignBufferDescriptorIDsPass());
   devicePM.addPass(AIE::createAIEObjectFifoRegisterProcessPass());
   devicePM.addPass(AIE::createAIEObjectFifoStatefulTransformPass());
+  devicePM.addPass(AIE::createAIEAssignBufferDescriptorIDsPass());
   devicePM.addPass(AIEX::createAIEBroadcastPacketPass());
   devicePM.addPass(AIE::createAIERoutePacketFlowsPass());
   devicePM.addPass(AIEX::createAIELowerMulticastPass());
@@ -212,14 +214,30 @@ int runTool(StringRef Program, ArrayRef<std::string> Args, bool Verbose,
   std::optional<sys::ProcessStatistics> opt_stats(stats);
   SmallVector<StringRef, 8> PArgs = {Program};
   PArgs.append(Args.begin(), Args.end());
-  int result = sys::ExecuteAndWait(Program, PArgs, Env, {}, 0, 0, &err_msg,
-                                   nullptr, &opt_stats);
-  if (Verbose)
+
+  SmallVector<char> tmpPath;
+  auto ec = llvm::sys::fs::createTemporaryFile("run_tool", "", tmpPath);
+  if (ec) {
+    llvm::errs() << "Failed to create temporary file: " << ec.message() << "\n";
+    return -1;
+  }
+
+  // Convert tmpPath to a StringRef:
+  StringRef tp(tmpPath.begin(), tmpPath.size());
+
+  int result = sys::ExecuteAndWait(Program, PArgs, Env, {tp, tp, tp}, 0, 0,
+                                   &err_msg, nullptr, &opt_stats);
+  if (Verbose) {
     llvm::outs() << (result == 0 ? "Succeeded " : "Failed ") << "in "
                  << std::chrono::duration_cast<std::chrono::duration<float>>(
                         stats.TotalTime)
                         .count()
                  << " code: " << result << "\n";
+    std::ifstream t(tp.str());
+    std::stringstream buffer;
+    buffer << t.rdbuf();
+    llvm::outs() << buffer.str();
+  }
   return result;
 }
 
@@ -369,13 +387,13 @@ static LogicalResult generateCDO(MLIRContext *context, ModuleOp moduleOp,
   // compilation in aiecc.py... not sure we need this.
   PassManager passManager(context, ModuleOp::getOperationName());
   applyConfigToPassManager(TK, passManager);
-
   passManager.addNestedPass<AIE::DeviceOp>(AIE::createAIEPathfinderPass());
   passManager.addNestedPass<AIE::DeviceOp>(
       AIEX::createAIEBroadcastPacketPass());
   passManager.addNestedPass<AIE::DeviceOp>(
       AIE::createAIERoutePacketFlowsPass());
   passManager.addNestedPass<AIE::DeviceOp>(AIEX::createAIELowerMulticastPass());
+
   if (failed(passManager.run(copy)))
     return moduleOp.emitOpError(
         "failed to run passes to prepare of XCLBin generation");
@@ -432,13 +450,19 @@ static json::Object makeKernelJSON(std::string name, std::string id,
                                              {"memory-connection", "HOST"},
                                              {"address-qualifier", "GLOBAL"},
                                              {"type", "void*"},
-                                             {"offset", "0x34"}}}},
+                                             {"offset", "0x34"}},
+                                json::Object{{"name", "bo5"},
+                                             {"memory-connection", "HOST"},
+                                             {"address-qualifier", "GLOBAL"},
+                                             {"type", "void*"},
+                                             {"offset", "0x3c"}}}},
       {"instances", json::Array{json::Object{{"name", instance}}}}};
 }
 
 static LogicalResult generateXCLBin(MLIRContext *context, ModuleOp moduleOp,
                                     XCLBinGenConfig &TK,
-                                    const StringRef &Output) {
+                                    const StringRef &Output,
+                                    const StringRef &inputXclbin = "") {
   std::string errorMessage;
   // Create mem_topology.json.
   SmallString<64> memTopologyJsonFile(TK.TempDir);
@@ -507,7 +531,8 @@ static LogicalResult generateXCLBin(MLIRContext *context, ModuleOp moduleOp,
                   "type": "PRIMARY",
                   "pdi_id": "0x01",
                   "dpu_kernel_ids": [
-                    "0x901"
+                    ")" + TK.XCLBinKernelID +
+                                          R"("
                   ],
                   "pre_cdo_groups": [
                     "0xC1"
@@ -581,22 +606,66 @@ static LogicalResult generateXCLBin(MLIRContext *context, ModuleOp moduleOp,
     if (runTool(bootgenBin, flags, TK.Verbose) != 0)
       return moduleOp.emitOpError("failed to execute bootgen");
   }
-
+  SmallVector<std::string, 20> flags;
   // Execute the xclbinutil command.
+  std::string memArg = "MEM_TOPOLOGY:JSON:" + std::string(memTopologyJsonFile);
+  std::string partArg =
+      "AIE_PARTITION:JSON:" + std::string(aiePartitionJsonFile);
   {
-    std::string memArg =
-        "MEM_TOPOLOGY:JSON:" + std::string(memTopologyJsonFile);
-    std::string partArg =
-        "AIE_PARTITION:JSON:" + std::string(aiePartitionJsonFile);
-    SmallVector<std::string, 20> flags{"--add-replace-section",
-                                       memArg,
-                                       "--add-kernel",
-                                       std::string(kernelsJsonFile),
-                                       "--add-replace-section",
-                                       partArg,
-                                       "--force",
-                                       "--output",
-                                       std::string(Output)};
+
+    if (!inputXclbin.empty()) {
+      // Create aie_partition.json.
+      SmallString<64> aieInputPartitionJsonFile(TK.TempDir);
+      sys::path::append(aieInputPartitionJsonFile, "aie_input_partition.json");
+
+      std::string inputPartArg =
+          "AIE_PARTITION:JSON:" + std::string(aieInputPartitionJsonFile);
+      SmallVector<std::string, 20> inputFlags{"--dump-section", inputPartArg,
+                                              "--force", "--input",
+                                              std::string(inputXclbin)};
+      if (auto xclbinutil = sys::findProgramByName("xclbinutil")) {
+        if (runTool(*xclbinutil, inputFlags, TK.Verbose) != 0)
+          return moduleOp.emitOpError("failed to execute xclbinutil");
+      } else {
+        return moduleOp.emitOpError("could not find xclbinutil");
+      }
+      auto aieInputPartitionOut =
+          openInputFile(aieInputPartitionJsonFile, &errorMessage);
+      if (!aieInputPartitionOut)
+        return moduleOp.emitOpError(errorMessage);
+      Expected<json::Value> aieInputPartitionOutValue =
+          llvm::json::parse(aieInputPartitionOut->getBuffer());
+      json::Array *aieInputPartionPDIs;
+      aieInputPartionPDIs = aieInputPartitionOutValue->getAsObject()
+                                ->getObject("aie_partition")
+                                ->getArray("PDIs");
+      auto aiePartitionOut = openInputFile(aiePartitionJsonFile, &errorMessage);
+      if (!aiePartitionOut)
+        return moduleOp.emitOpError(errorMessage);
+      llvm::Expected<llvm::json::Value> aiePartitionOutValue =
+          llvm::json::parse(aiePartitionOut->getBuffer());
+      json::Array *aiePartionPDIs;
+      aiePartionPDIs = aiePartitionOutValue->getAsObject()
+                           ->getObject("aie_partition")
+                           ->getArray("PDIs");
+      aieInputPartionPDIs->insert(aieInputPartionPDIs->end(),
+                                  aiePartionPDIs->begin(),
+                                  aiePartionPDIs->end());
+      // rewrite aie partion json file
+      auto aiePartitionJsonOut =
+          openOutputFile(aiePartitionJsonFile, &errorMessage);
+      if (!aiePartitionJsonOut)
+        return moduleOp.emitOpError(errorMessage);
+      aiePartitionJsonOut->os() << formatv("{0:2}", *aieInputPartitionOutValue);
+      aiePartitionJsonOut->keep();
+      flags.insert(flags.end(), {"--input", std::string(inputXclbin)});
+
+    } else {
+      flags.insert(flags.end(), {"--add-replace-section", memArg});
+    }
+    flags.insert(flags.end(), {"--add-kernel", std::string(kernelsJsonFile),
+                               "--add-replace-section", partArg, "--force",
+                               "--output", std::string(Output)});
 
     if (auto xclbinutil = sys::findProgramByName("xclbinutil")) {
       if (runTool(*xclbinutil, flags, TK.Verbose) != 0)
@@ -825,7 +894,8 @@ static LogicalResult generateUnifiedObject(MLIRContext *context,
 
 LogicalResult xilinx::aie2xclbin(MLIRContext *ctx, ModuleOp moduleOp,
                                  XCLBinGenConfig &TK, StringRef OutputNPU,
-                                 StringRef OutputXCLBin) {
+                                 StringRef OutputXCLBin,
+                                 StringRef InputXCLBin = "") {
   PassManager pm(ctx, moduleOp.getOperationName());
   applyConfigToPassManager(TK, pm);
 
@@ -886,7 +956,7 @@ LogicalResult xilinx::aie2xclbin(MLIRContext *ctx, ModuleOp moduleOp,
   if (failed(generateCDO(ctx, moduleOp, TK)))
     return moduleOp.emitOpError("Failed to generate CDO");
 
-  if (failed(generateXCLBin(ctx, moduleOp, TK, OutputXCLBin)))
+  if (failed(generateXCLBin(ctx, moduleOp, TK, OutputXCLBin, InputXCLBin)))
     return moduleOp.emitOpError("Failed to generate XCLBin");
 
   return success();
