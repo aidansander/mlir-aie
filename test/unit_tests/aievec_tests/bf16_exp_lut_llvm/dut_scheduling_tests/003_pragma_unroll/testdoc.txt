@@ -1,0 +1,10 @@
+    Added pragma unroll to innermost loop, no manual changes to .ll END_TITLE
+
+MID_EDITS: None
+
+FILE_FLOW(dut_inlined.ll): dut_inlined.cc -(peano clang)-> dut_inlined.ll
+FILE_FLOW(lut_based_ops.ll): /path/to/aie_runtime_lib/AIE2/lut_based_ops.cpp -(peano clang)-> lut_based_ops.ll
+
+
+NOTES:
+Unrolling with manual software pipelining gives much better performance, but also makes the resulting .ll harder to modify.

@@ -1,0 +1,12 @@
+    Manually added !noalias metadata to innermost loop store to not alias with closest LUT load END_TITLE
+
+MID_EDITS: dut_inlined.ll, do not remake
+
+FILE_FLOW(dut_inlined.ll): dut_inlined.cc -(peano clang)-> dut_inlined.ll -(manual edits)-> dut_inlined.ll
+FILE_FLOW(lut_based_ops.ll): /path/to/aie_runtime_lib/AIE2/lut_based_ops.cpp -(peano clang)-> lut_based_ops.ll
+
+
+NOTES:
+Manually editing the .ll didn't have any notable affect. Looking at the lst, when unrolling is disabled, the two-cycle 
+dependency/ wait between the store and first LUT load is longer due to other factors, so explicit noaliasing won't 
+give any improvements without unroll.

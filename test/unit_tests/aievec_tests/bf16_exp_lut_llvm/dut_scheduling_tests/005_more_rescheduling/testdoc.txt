@@ -1,0 +1,10 @@
+    Changed data type of loads to try and reduce register pressure by using quarter accumulator where possible, similar to chess END_TITLE
+
+MID_EDITS: None
+
+FILE_FLOW(dut_inlined.ll): dut_inlined.cc -(peano clang)-> dut_inlined.ll
+FILE_FLOW(lut_based_ops.ll): /path/to/aie_runtime_lib/AIE2/lut_based_ops.cpp -(peano clang)-> lut_based_ops.ll
+
+
+NOTES:
+No apparent effect on produced LST

@@ -1,0 +1,12 @@
+    Baseline test on manually software pipelined dut_inlined.cc END_TITLE
+
+MID_EDITS: None
+
+FILE_FLOW(dut_inlined.ll): dut_inlined.cc -(peano clang)-> dut_inlined.ll
+FILE_FLOW(lut_based_ops.ll): /path/to/aie_runtime_lib/AIE2/lut_based_ops.cpp -(peano clang)-> lut_based_ops.ll
+
+
+NOTES:
+dut_inlined.cc is the result of manually inlining the call to getExpbf16() and then manually software pipelining,
+by using intermediate variables to force operations that consume load results (mmul, casting) to occur one loop
+iteration later than the load itself - see dut_inlined.cc for this in practice.

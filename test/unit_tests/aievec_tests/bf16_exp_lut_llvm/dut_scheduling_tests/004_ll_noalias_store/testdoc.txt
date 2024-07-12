@@ -1,0 +1,10 @@
+    Added noalias metadata to a few of the stores in the unrolled loop, all being set not to alias with a nearby LUT load END_TITLE
+
+MID_EDITS: dut_inlined.ll
+
+FILE_FLOW(dut_inlined.ll): dut_inlined.cc -(peano clang)-> dut_inlined.ll -(manual edits)-> dut_inlined.ll
+FILE_FLOW(lut_based_ops.ll): /path/to/aie_runtime_lib/AIE2/lut_based_ops.cpp -(peano clang)-> lut_based_ops.ll
+
+
+NOTES:
+Unrolling with manual software pipelining gives much better performance, but also makes the resulting .ll harder to modify.
