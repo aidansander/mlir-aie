@@ -3,15 +3,13 @@ source_filename = "dut_inlined.cc"
 target datalayout = "e-m:e-p:20:32-i1:8:32-i8:8:32-i16:16:32-i32:32:32-f32:32:32-i64:32-f64:32-a:0:32-n32"
 target triple = "aie2"
 
-%class.bfloat16 = type { bfloat }
-
 @exp_ilut_ab = external dso_local global [512 x i16], align 32
 @exp_ilut_cd = external dso_local global [512 x i16], align 32
 @exp_flut_ab = external dso_local global [512 x i16], align 32
 @exp_flut_cd = external dso_local global [512 x i16], align 32
 
 ; Function Attrs: mustprogress nofree nounwind memory(read, argmem: readwrite)
-define dso_local void @_Z3dutP8bfloat16S0_(ptr noalias nocapture readonly %0, ptr noalias nocapture writeonly %1) local_unnamed_addr #0 {
+define dso_local void @dut(ptr noalias nocapture readonly %0, ptr noalias nocapture writeonly %1) local_unnamed_addr #0 {
   %3 = tail call noundef <16 x i32> @llvm.aie2.v16int32()
   %4 = tail call noundef <16 x i32> @llvm.aie2.vbroadcast32.I512(i32 1023)
   %5 = tail call noundef <16 x i32> @llvm.aie2.vbroadcast32.I512(i32 0)
@@ -19,14 +17,14 @@ define dso_local void @_Z3dutP8bfloat16S0_(ptr noalias nocapture readonly %0, pt
   %7 = tail call noundef <8 x i64> @llvm.aie2.v16accfloat()
   %8 = tail call noundef <16 x i16> @llvm.aie2.v16int16()
   %9 = load <16 x bfloat>, ptr %0, align 32, !tbaa !2
-  %10 = getelementptr inbounds %class.bfloat16, ptr %0, i20 16
+  %10 = getelementptr inbounds bfloat, ptr %0, i20 16
   %11 = load <16 x bfloat>, ptr %10, align 32, !tbaa !2
   %12 = tail call noundef <16 x i32> @llvm.aie2.v16bf16.to.v16i32(<16 x bfloat> %9, i32 8)
   %13 = tail call noundef <32 x i16> @llvm.aie2.v32int16()
   %14 = bitcast <32 x i16> %13 to <16 x i32>
   %15 = tail call <16 x i32> @llvm.aie2.vshuffle(<16 x i32> %12, <16 x i32> %14, i32 2)
   %16 = tail call <8 x i32> @llvm.aie2.ext.I256.I512(<16 x i32> %15, i32 0)
-  %17 = getelementptr inbounds %class.bfloat16, ptr %0, i20 32
+  %17 = getelementptr inbounds bfloat, ptr %0, i20 32
   %18 = load <16 x bfloat>, ptr %17, align 32, !tbaa !2
   %19 = tail call noundef <16 x i32> @llvm.aie2.v16bf16.to.v16i32(<16 x bfloat> %11, i32 8)
   %20 = tail call <16 x i32> @llvm.aie2.vshuffle(<16 x i32> %19, <16 x i32> %14, i32 2)
@@ -76,7 +74,7 @@ define dso_local void @_Z3dutP8bfloat16S0_(ptr noalias nocapture readonly %0, pt
   %64 = tail call <16 x i32> @llvm.aie2.vshuffle(<16 x i32> %58, <16 x i32> %63, i32 24)
   %65 = bitcast <16 x i32> %64 to <32 x bfloat>
   %66 = tail call <16 x bfloat> @llvm.aie2.ext.bf256.bf512(<32 x bfloat> %65, i32 0)
-  %67 = getelementptr %class.bfloat16, ptr %0, i20 48
+  %67 = getelementptr bfloat, ptr %0, i20 48
   %68 = bitcast <8 x i32> %21 to <16 x i16>
   %69 = load <16 x bfloat>, ptr %67, align 32, !tbaa !2
   %70 = tail call noundef <16 x i32> @llvm.aie2.v16bf16.to.v16i32(<16 x bfloat> %18, i32 8)
@@ -122,9 +120,9 @@ define dso_local void @_Z3dutP8bfloat16S0_(ptr noalias nocapture readonly %0, pt
   %110 = tail call <32 x bfloat> @llvm.aie2.upd.bf512.bf256(<32 x bfloat> %109, <16 x bfloat> %106, i32 1)
   %111 = tail call noundef <8 x i64> @llvm.aie2.bf.mul16.conf(<32 x bfloat> %108, <32 x bfloat> %110, i32 60)
   %112 = tail call noundef <16 x bfloat> @llvm.aie2.v16accfloat.to.v16bf16(<8 x i64> %111)
-  store <16 x bfloat> %112, ptr %1, align 32, !tbaa !2, !noalias !15
+  store <16 x bfloat> %112, ptr %1, align 32, !tbaa !2
   %113 = bitcast <8 x i32> %72 to <16 x i16>
-  %114 = getelementptr %class.bfloat16, ptr %0, i20 64
+  %114 = getelementptr bfloat, ptr %0, i20 64
   %115 = load <16 x bfloat>, ptr %114, align 32, !tbaa !2
   %116 = tail call noundef <16 x i32> @llvm.aie2.v16bf16.to.v16i32(<16 x bfloat> %69, i32 8)
   %117 = tail call <16 x i32> @llvm.aie2.vshuffle(<16 x i32> %116, <16 x i32> %14, i32 2)
@@ -167,10 +165,10 @@ define dso_local void @_Z3dutP8bfloat16S0_(ptr noalias nocapture readonly %0, pt
   %154 = tail call <32 x bfloat> @llvm.aie2.upd.bf512.bf256(<32 x bfloat> %153, <16 x bfloat> %106, i32 1)
   %155 = tail call noundef <8 x i64> @llvm.aie2.bf.mul16.conf(<32 x bfloat> %152, <32 x bfloat> %154, i32 60)
   %156 = tail call noundef <16 x bfloat> @llvm.aie2.v16accfloat.to.v16bf16(<8 x i64> %155)
-  %157 = getelementptr inbounds %class.bfloat16, ptr %1, i20 16
-  store <16 x bfloat> %156, ptr %157, align 32, !tbaa !2, !noalias !15
+  %157 = getelementptr inbounds bfloat, ptr %1, i20 16
+  store <16 x bfloat> %156, ptr %157, align 32, !tbaa !2
   %158 = bitcast <8 x i32> %118 to <16 x i16>
-  %159 = getelementptr %class.bfloat16, ptr %0, i20 80
+  %159 = getelementptr bfloat, ptr %0, i20 80
   %160 = load <16 x bfloat>, ptr %159, align 32, !tbaa !2
   %161 = tail call noundef <16 x i32> @llvm.aie2.v16bf16.to.v16i32(<16 x bfloat> %115, i32 8)
   %162 = tail call <16 x i32> @llvm.aie2.vshuffle(<16 x i32> %161, <16 x i32> %14, i32 2)
@@ -213,10 +211,10 @@ define dso_local void @_Z3dutP8bfloat16S0_(ptr noalias nocapture readonly %0, pt
   %199 = tail call <32 x bfloat> @llvm.aie2.upd.bf512.bf256(<32 x bfloat> %198, <16 x bfloat> %106, i32 1)
   %200 = tail call noundef <8 x i64> @llvm.aie2.bf.mul16.conf(<32 x bfloat> %197, <32 x bfloat> %199, i32 60)
   %201 = tail call noundef <16 x bfloat> @llvm.aie2.v16accfloat.to.v16bf16(<8 x i64> %200)
-  %202 = getelementptr inbounds %class.bfloat16, ptr %1, i20 32
-  store <16 x bfloat> %201, ptr %202, align 32, !tbaa !2, !noalias !15
+  %202 = getelementptr inbounds bfloat, ptr %1, i20 32
+  store <16 x bfloat> %201, ptr %202, align 32, !tbaa !2
   %203 = bitcast <8 x i32> %163 to <16 x i16>
-  %204 = getelementptr %class.bfloat16, ptr %0, i20 96
+  %204 = getelementptr bfloat, ptr %0, i20 96
   %205 = load <16 x bfloat>, ptr %204, align 32, !tbaa !2
   %206 = tail call noundef <16 x i32> @llvm.aie2.v16bf16.to.v16i32(<16 x bfloat> %160, i32 8)
   %207 = tail call <16 x i32> @llvm.aie2.vshuffle(<16 x i32> %206, <16 x i32> %14, i32 2)
@@ -259,10 +257,10 @@ define dso_local void @_Z3dutP8bfloat16S0_(ptr noalias nocapture readonly %0, pt
   %244 = tail call <32 x bfloat> @llvm.aie2.upd.bf512.bf256(<32 x bfloat> %243, <16 x bfloat> %106, i32 1)
   %245 = tail call noundef <8 x i64> @llvm.aie2.bf.mul16.conf(<32 x bfloat> %242, <32 x bfloat> %244, i32 60)
   %246 = tail call noundef <16 x bfloat> @llvm.aie2.v16accfloat.to.v16bf16(<8 x i64> %245)
-  %247 = getelementptr inbounds %class.bfloat16, ptr %1, i20 48
-  store <16 x bfloat> %246, ptr %247, align 32, !tbaa !2, !noalias !15
+  %247 = getelementptr inbounds bfloat, ptr %1, i20 48
+  store <16 x bfloat> %246, ptr %247, align 32, !tbaa !2
   %248 = bitcast <8 x i32> %208 to <16 x i16>
-  %249 = getelementptr %class.bfloat16, ptr %0, i20 112
+  %249 = getelementptr bfloat, ptr %0, i20 112
   %250 = load <16 x bfloat>, ptr %249, align 32, !tbaa !2
   %251 = tail call noundef <16 x i32> @llvm.aie2.v16bf16.to.v16i32(<16 x bfloat> %205, i32 8)
   %252 = tail call <16 x i32> @llvm.aie2.vshuffle(<16 x i32> %251, <16 x i32> %14, i32 2)
@@ -305,10 +303,10 @@ define dso_local void @_Z3dutP8bfloat16S0_(ptr noalias nocapture readonly %0, pt
   %289 = tail call <32 x bfloat> @llvm.aie2.upd.bf512.bf256(<32 x bfloat> %288, <16 x bfloat> %106, i32 1)
   %290 = tail call noundef <8 x i64> @llvm.aie2.bf.mul16.conf(<32 x bfloat> %287, <32 x bfloat> %289, i32 60)
   %291 = tail call noundef <16 x bfloat> @llvm.aie2.v16accfloat.to.v16bf16(<8 x i64> %290)
-  %292 = getelementptr inbounds %class.bfloat16, ptr %1, i20 64
-  store <16 x bfloat> %291, ptr %292, align 32, !tbaa !2, !noalias !15
+  %292 = getelementptr inbounds bfloat, ptr %1, i20 64
+  store <16 x bfloat> %291, ptr %292, align 32, !tbaa !2
   %293 = bitcast <8 x i32> %253 to <16 x i16>
-  %294 = getelementptr %class.bfloat16, ptr %0, i20 128
+  %294 = getelementptr bfloat, ptr %0, i20 128
   %295 = load <16 x bfloat>, ptr %294, align 32, !tbaa !2
   %296 = tail call noundef <16 x i32> @llvm.aie2.v16bf16.to.v16i32(<16 x bfloat> %250, i32 8)
   %297 = tail call <16 x i32> @llvm.aie2.vshuffle(<16 x i32> %296, <16 x i32> %14, i32 2)
@@ -351,10 +349,10 @@ define dso_local void @_Z3dutP8bfloat16S0_(ptr noalias nocapture readonly %0, pt
   %334 = tail call <32 x bfloat> @llvm.aie2.upd.bf512.bf256(<32 x bfloat> %333, <16 x bfloat> %106, i32 1)
   %335 = tail call noundef <8 x i64> @llvm.aie2.bf.mul16.conf(<32 x bfloat> %332, <32 x bfloat> %334, i32 60)
   %336 = tail call noundef <16 x bfloat> @llvm.aie2.v16accfloat.to.v16bf16(<8 x i64> %335)
-  %337 = getelementptr inbounds %class.bfloat16, ptr %1, i20 80
-  store <16 x bfloat> %336, ptr %337, align 32, !tbaa !2, !noalias !15
+  %337 = getelementptr inbounds bfloat, ptr %1, i20 80
+  store <16 x bfloat> %336, ptr %337, align 32, !tbaa !2
   %338 = bitcast <8 x i32> %298 to <16 x i16>
-  %339 = getelementptr %class.bfloat16, ptr %0, i20 144
+  %339 = getelementptr bfloat, ptr %0, i20 144
   %340 = load <16 x bfloat>, ptr %339, align 32, !tbaa !2
   %341 = tail call noundef <16 x i32> @llvm.aie2.v16bf16.to.v16i32(<16 x bfloat> %295, i32 8)
   %342 = tail call <16 x i32> @llvm.aie2.vshuffle(<16 x i32> %341, <16 x i32> %14, i32 2)
@@ -397,10 +395,10 @@ define dso_local void @_Z3dutP8bfloat16S0_(ptr noalias nocapture readonly %0, pt
   %379 = tail call <32 x bfloat> @llvm.aie2.upd.bf512.bf256(<32 x bfloat> %378, <16 x bfloat> %106, i32 1)
   %380 = tail call noundef <8 x i64> @llvm.aie2.bf.mul16.conf(<32 x bfloat> %377, <32 x bfloat> %379, i32 60)
   %381 = tail call noundef <16 x bfloat> @llvm.aie2.v16accfloat.to.v16bf16(<8 x i64> %380)
-  %382 = getelementptr inbounds %class.bfloat16, ptr %1, i20 96
-  store <16 x bfloat> %381, ptr %382, align 32, !tbaa !2, !noalias !20
+  %382 = getelementptr inbounds bfloat, ptr %1, i20 96
+  store <16 x bfloat> %381, ptr %382, align 32, !tbaa !2
   %383 = bitcast <8 x i32> %343 to <16 x i16>
-  %384 = getelementptr %class.bfloat16, ptr %0, i20 160
+  %384 = getelementptr bfloat, ptr %0, i20 160
   %385 = load <16 x bfloat>, ptr %384, align 32, !tbaa !2
   %386 = tail call noundef <16 x i32> @llvm.aie2.v16bf16.to.v16i32(<16 x bfloat> %340, i32 8)
   %387 = tail call <16 x i32> @llvm.aie2.vshuffle(<16 x i32> %386, <16 x i32> %14, i32 2)
@@ -443,10 +441,10 @@ define dso_local void @_Z3dutP8bfloat16S0_(ptr noalias nocapture readonly %0, pt
   %424 = tail call <32 x bfloat> @llvm.aie2.upd.bf512.bf256(<32 x bfloat> %423, <16 x bfloat> %106, i32 1)
   %425 = tail call noundef <8 x i64> @llvm.aie2.bf.mul16.conf(<32 x bfloat> %422, <32 x bfloat> %424, i32 60)
   %426 = tail call noundef <16 x bfloat> @llvm.aie2.v16accfloat.to.v16bf16(<8 x i64> %425)
-  %427 = getelementptr inbounds %class.bfloat16, ptr %1, i20 112
-  store <16 x bfloat> %426, ptr %427, align 32, !tbaa !2, !noalias !20
+  %427 = getelementptr inbounds bfloat, ptr %1, i20 112
+  store <16 x bfloat> %426, ptr %427, align 32, !tbaa !2
   %428 = bitcast <8 x i32> %388 to <16 x i16>
-  %429 = getelementptr %class.bfloat16, ptr %0, i20 176
+  %429 = getelementptr bfloat, ptr %0, i20 176
   %430 = load <16 x bfloat>, ptr %429, align 32, !tbaa !2
   %431 = tail call noundef <16 x i32> @llvm.aie2.v16bf16.to.v16i32(<16 x bfloat> %385, i32 8)
   %432 = tail call <16 x i32> @llvm.aie2.vshuffle(<16 x i32> %431, <16 x i32> %14, i32 2)
@@ -489,10 +487,10 @@ define dso_local void @_Z3dutP8bfloat16S0_(ptr noalias nocapture readonly %0, pt
   %469 = tail call <32 x bfloat> @llvm.aie2.upd.bf512.bf256(<32 x bfloat> %468, <16 x bfloat> %106, i32 1)
   %470 = tail call noundef <8 x i64> @llvm.aie2.bf.mul16.conf(<32 x bfloat> %467, <32 x bfloat> %469, i32 60)
   %471 = tail call noundef <16 x bfloat> @llvm.aie2.v16accfloat.to.v16bf16(<8 x i64> %470)
-  %472 = getelementptr inbounds %class.bfloat16, ptr %1, i20 128
-  store <16 x bfloat> %471, ptr %472, align 32, !tbaa !2, !noalias !20
+  %472 = getelementptr inbounds bfloat, ptr %1, i20 128
+  store <16 x bfloat> %471, ptr %472, align 32, !tbaa !2
   %473 = bitcast <8 x i32> %433 to <16 x i16>
-  %474 = getelementptr %class.bfloat16, ptr %0, i20 192
+  %474 = getelementptr bfloat, ptr %0, i20 192
   %475 = load <16 x bfloat>, ptr %474, align 32, !tbaa !2
   %476 = tail call noundef <16 x i32> @llvm.aie2.v16bf16.to.v16i32(<16 x bfloat> %430, i32 8)
   %477 = tail call <16 x i32> @llvm.aie2.vshuffle(<16 x i32> %476, <16 x i32> %14, i32 2)
@@ -535,10 +533,10 @@ define dso_local void @_Z3dutP8bfloat16S0_(ptr noalias nocapture readonly %0, pt
   %514 = tail call <32 x bfloat> @llvm.aie2.upd.bf512.bf256(<32 x bfloat> %513, <16 x bfloat> %106, i32 1)
   %515 = tail call noundef <8 x i64> @llvm.aie2.bf.mul16.conf(<32 x bfloat> %512, <32 x bfloat> %514, i32 60)
   %516 = tail call noundef <16 x bfloat> @llvm.aie2.v16accfloat.to.v16bf16(<8 x i64> %515)
-  %517 = getelementptr inbounds %class.bfloat16, ptr %1, i20 144
-  store <16 x bfloat> %516, ptr %517, align 32, !tbaa !2, !noalias !20
+  %517 = getelementptr inbounds bfloat, ptr %1, i20 144
+  store <16 x bfloat> %516, ptr %517, align 32, !tbaa !2
   %518 = bitcast <8 x i32> %478 to <16 x i16>
-  %519 = getelementptr %class.bfloat16, ptr %0, i20 208
+  %519 = getelementptr bfloat, ptr %0, i20 208
   %520 = load <16 x bfloat>, ptr %519, align 32, !tbaa !2
   %521 = tail call noundef <16 x i32> @llvm.aie2.v16bf16.to.v16i32(<16 x bfloat> %475, i32 8)
   %522 = tail call <16 x i32> @llvm.aie2.vshuffle(<16 x i32> %521, <16 x i32> %14, i32 2)
@@ -581,10 +579,10 @@ define dso_local void @_Z3dutP8bfloat16S0_(ptr noalias nocapture readonly %0, pt
   %559 = tail call <32 x bfloat> @llvm.aie2.upd.bf512.bf256(<32 x bfloat> %558, <16 x bfloat> %106, i32 1)
   %560 = tail call noundef <8 x i64> @llvm.aie2.bf.mul16.conf(<32 x bfloat> %557, <32 x bfloat> %559, i32 60)
   %561 = tail call noundef <16 x bfloat> @llvm.aie2.v16accfloat.to.v16bf16(<8 x i64> %560)
-  %562 = getelementptr inbounds %class.bfloat16, ptr %1, i20 160
-  store <16 x bfloat> %561, ptr %562, align 32, !tbaa !2, !noalias !20
+  %562 = getelementptr inbounds bfloat, ptr %1, i20 160
+  store <16 x bfloat> %561, ptr %562, align 32, !tbaa !2
   %563 = bitcast <8 x i32> %523 to <16 x i16>
-  %564 = getelementptr %class.bfloat16, ptr %0, i20 224
+  %564 = getelementptr bfloat, ptr %0, i20 224
   %565 = load <16 x bfloat>, ptr %564, align 32, !tbaa !2
   %566 = tail call noundef <16 x i32> @llvm.aie2.v16bf16.to.v16i32(<16 x bfloat> %520, i32 8)
   %567 = tail call <16 x i32> @llvm.aie2.vshuffle(<16 x i32> %566, <16 x i32> %14, i32 2)
@@ -627,10 +625,10 @@ define dso_local void @_Z3dutP8bfloat16S0_(ptr noalias nocapture readonly %0, pt
   %604 = tail call <32 x bfloat> @llvm.aie2.upd.bf512.bf256(<32 x bfloat> %603, <16 x bfloat> %106, i32 1)
   %605 = tail call noundef <8 x i64> @llvm.aie2.bf.mul16.conf(<32 x bfloat> %602, <32 x bfloat> %604, i32 60)
   %606 = tail call noundef <16 x bfloat> @llvm.aie2.v16accfloat.to.v16bf16(<8 x i64> %605)
-  %607 = getelementptr inbounds %class.bfloat16, ptr %1, i20 176
-  store <16 x bfloat> %606, ptr %607, align 32, !tbaa !2, !noalias !20
+  %607 = getelementptr inbounds bfloat, ptr %1, i20 176
+  store <16 x bfloat> %606, ptr %607, align 32, !tbaa !2
   %608 = bitcast <8 x i32> %568 to <16 x i16>
-  %609 = getelementptr %class.bfloat16, ptr %0, i20 240
+  %609 = getelementptr bfloat, ptr %0, i20 240
   %610 = load <16 x bfloat>, ptr %609, align 32, !tbaa !2
   %611 = tail call noundef <16 x i32> @llvm.aie2.v16bf16.to.v16i32(<16 x bfloat> %565, i32 8)
   %612 = tail call <16 x i32> @llvm.aie2.vshuffle(<16 x i32> %611, <16 x i32> %14, i32 2)
@@ -673,10 +671,10 @@ define dso_local void @_Z3dutP8bfloat16S0_(ptr noalias nocapture readonly %0, pt
   %649 = tail call <32 x bfloat> @llvm.aie2.upd.bf512.bf256(<32 x bfloat> %648, <16 x bfloat> %106, i32 1)
   %650 = tail call noundef <8 x i64> @llvm.aie2.bf.mul16.conf(<32 x bfloat> %647, <32 x bfloat> %649, i32 60)
   %651 = tail call noundef <16 x bfloat> @llvm.aie2.v16accfloat.to.v16bf16(<8 x i64> %650)
-  %652 = getelementptr inbounds %class.bfloat16, ptr %1, i20 192
+  %652 = getelementptr inbounds bfloat, ptr %1, i20 192
   store <16 x bfloat> %651, ptr %652, align 32, !tbaa !2
   %653 = bitcast <8 x i32> %613 to <16 x i16>
-  %654 = getelementptr %class.bfloat16, ptr %0, i20 256
+  %654 = getelementptr bfloat, ptr %0, i20 256
   %655 = load <16 x bfloat>, ptr %654, align 32, !tbaa !2
   %656 = tail call noundef <16 x i32> @llvm.aie2.v16bf16.to.v16i32(<16 x bfloat> %610, i32 8)
   %657 = tail call <16 x i32> @llvm.aie2.vshuffle(<16 x i32> %656, <16 x i32> %14, i32 2)
@@ -719,10 +717,10 @@ define dso_local void @_Z3dutP8bfloat16S0_(ptr noalias nocapture readonly %0, pt
   %694 = tail call <32 x bfloat> @llvm.aie2.upd.bf512.bf256(<32 x bfloat> %693, <16 x bfloat> %106, i32 1)
   %695 = tail call noundef <8 x i64> @llvm.aie2.bf.mul16.conf(<32 x bfloat> %692, <32 x bfloat> %694, i32 60)
   %696 = tail call noundef <16 x bfloat> @llvm.aie2.v16accfloat.to.v16bf16(<8 x i64> %695)
-  %697 = getelementptr inbounds %class.bfloat16, ptr %1, i20 208
+  %697 = getelementptr inbounds bfloat, ptr %1, i20 208
   store <16 x bfloat> %696, ptr %697, align 32, !tbaa !2
   %698 = bitcast <8 x i32> %658 to <16 x i16>
-  %699 = getelementptr %class.bfloat16, ptr %0, i20 272
+  %699 = getelementptr bfloat, ptr %0, i20 272
   %700 = load <16 x bfloat>, ptr %699, align 32, !tbaa !2
   %701 = tail call noundef <16 x i32> @llvm.aie2.v16bf16.to.v16i32(<16 x bfloat> %655, i32 8)
   %702 = tail call <16 x i32> @llvm.aie2.vshuffle(<16 x i32> %701, <16 x i32> %14, i32 2)
@@ -765,10 +763,10 @@ define dso_local void @_Z3dutP8bfloat16S0_(ptr noalias nocapture readonly %0, pt
   %739 = tail call <32 x bfloat> @llvm.aie2.upd.bf512.bf256(<32 x bfloat> %738, <16 x bfloat> %106, i32 1)
   %740 = tail call noundef <8 x i64> @llvm.aie2.bf.mul16.conf(<32 x bfloat> %737, <32 x bfloat> %739, i32 60)
   %741 = tail call noundef <16 x bfloat> @llvm.aie2.v16accfloat.to.v16bf16(<8 x i64> %740)
-  %742 = getelementptr inbounds %class.bfloat16, ptr %1, i20 224
+  %742 = getelementptr inbounds bfloat, ptr %1, i20 224
   store <16 x bfloat> %741, ptr %742, align 32, !tbaa !2
   %743 = bitcast <8 x i32> %703 to <16 x i16>
-  %744 = getelementptr %class.bfloat16, ptr %0, i20 288
+  %744 = getelementptr bfloat, ptr %0, i20 288
   %745 = load <16 x bfloat>, ptr %744, align 32, !tbaa !2
   %746 = tail call noundef <16 x i32> @llvm.aie2.v16bf16.to.v16i32(<16 x bfloat> %700, i32 8)
   %747 = tail call <16 x i32> @llvm.aie2.vshuffle(<16 x i32> %746, <16 x i32> %14, i32 2)
@@ -811,10 +809,10 @@ define dso_local void @_Z3dutP8bfloat16S0_(ptr noalias nocapture readonly %0, pt
   %784 = tail call <32 x bfloat> @llvm.aie2.upd.bf512.bf256(<32 x bfloat> %783, <16 x bfloat> %106, i32 1)
   %785 = tail call noundef <8 x i64> @llvm.aie2.bf.mul16.conf(<32 x bfloat> %782, <32 x bfloat> %784, i32 60)
   %786 = tail call noundef <16 x bfloat> @llvm.aie2.v16accfloat.to.v16bf16(<8 x i64> %785)
-  %787 = getelementptr inbounds %class.bfloat16, ptr %1, i20 240
+  %787 = getelementptr inbounds bfloat, ptr %1, i20 240
   store <16 x bfloat> %786, ptr %787, align 32, !tbaa !2
   %788 = bitcast <8 x i32> %748 to <16 x i16>
-  %789 = getelementptr %class.bfloat16, ptr %0, i20 304
+  %789 = getelementptr bfloat, ptr %0, i20 304
   %790 = load <16 x bfloat>, ptr %789, align 32, !tbaa !2
   %791 = tail call noundef <16 x i32> @llvm.aie2.v16bf16.to.v16i32(<16 x bfloat> %745, i32 8)
   %792 = tail call <16 x i32> @llvm.aie2.vshuffle(<16 x i32> %791, <16 x i32> %14, i32 2)
@@ -857,10 +855,10 @@ define dso_local void @_Z3dutP8bfloat16S0_(ptr noalias nocapture readonly %0, pt
   %829 = tail call <32 x bfloat> @llvm.aie2.upd.bf512.bf256(<32 x bfloat> %828, <16 x bfloat> %106, i32 1)
   %830 = tail call noundef <8 x i64> @llvm.aie2.bf.mul16.conf(<32 x bfloat> %827, <32 x bfloat> %829, i32 60)
   %831 = tail call noundef <16 x bfloat> @llvm.aie2.v16accfloat.to.v16bf16(<8 x i64> %830)
-  %832 = getelementptr inbounds %class.bfloat16, ptr %1, i20 256
+  %832 = getelementptr inbounds bfloat, ptr %1, i20 256
   store <16 x bfloat> %831, ptr %832, align 32, !tbaa !2
   %833 = bitcast <8 x i32> %793 to <16 x i16>
-  %834 = getelementptr %class.bfloat16, ptr %0, i20 320
+  %834 = getelementptr bfloat, ptr %0, i20 320
   %835 = load <16 x bfloat>, ptr %834, align 32, !tbaa !2
   %836 = tail call noundef <16 x i32> @llvm.aie2.v16bf16.to.v16i32(<16 x bfloat> %790, i32 8)
   %837 = tail call <16 x i32> @llvm.aie2.vshuffle(<16 x i32> %836, <16 x i32> %14, i32 2)
@@ -903,10 +901,10 @@ define dso_local void @_Z3dutP8bfloat16S0_(ptr noalias nocapture readonly %0, pt
   %874 = tail call <32 x bfloat> @llvm.aie2.upd.bf512.bf256(<32 x bfloat> %873, <16 x bfloat> %106, i32 1)
   %875 = tail call noundef <8 x i64> @llvm.aie2.bf.mul16.conf(<32 x bfloat> %872, <32 x bfloat> %874, i32 60)
   %876 = tail call noundef <16 x bfloat> @llvm.aie2.v16accfloat.to.v16bf16(<8 x i64> %875)
-  %877 = getelementptr inbounds %class.bfloat16, ptr %1, i20 272
+  %877 = getelementptr inbounds bfloat, ptr %1, i20 272
   store <16 x bfloat> %876, ptr %877, align 32, !tbaa !2
   %878 = bitcast <8 x i32> %838 to <16 x i16>
-  %879 = getelementptr %class.bfloat16, ptr %0, i20 336
+  %879 = getelementptr bfloat, ptr %0, i20 336
   %880 = load <16 x bfloat>, ptr %879, align 32, !tbaa !2
   %881 = tail call noundef <16 x i32> @llvm.aie2.v16bf16.to.v16i32(<16 x bfloat> %835, i32 8)
   %882 = tail call <16 x i32> @llvm.aie2.vshuffle(<16 x i32> %881, <16 x i32> %14, i32 2)
@@ -949,10 +947,10 @@ define dso_local void @_Z3dutP8bfloat16S0_(ptr noalias nocapture readonly %0, pt
   %919 = tail call <32 x bfloat> @llvm.aie2.upd.bf512.bf256(<32 x bfloat> %918, <16 x bfloat> %106, i32 1)
   %920 = tail call noundef <8 x i64> @llvm.aie2.bf.mul16.conf(<32 x bfloat> %917, <32 x bfloat> %919, i32 60)
   %921 = tail call noundef <16 x bfloat> @llvm.aie2.v16accfloat.to.v16bf16(<8 x i64> %920)
-  %922 = getelementptr inbounds %class.bfloat16, ptr %1, i20 288
+  %922 = getelementptr inbounds bfloat, ptr %1, i20 288
   store <16 x bfloat> %921, ptr %922, align 32, !tbaa !2
   %923 = bitcast <8 x i32> %883 to <16 x i16>
-  %924 = getelementptr %class.bfloat16, ptr %0, i20 352
+  %924 = getelementptr bfloat, ptr %0, i20 352
   %925 = load <16 x bfloat>, ptr %924, align 32, !tbaa !2
   %926 = tail call noundef <16 x i32> @llvm.aie2.v16bf16.to.v16i32(<16 x bfloat> %880, i32 8)
   %927 = tail call <16 x i32> @llvm.aie2.vshuffle(<16 x i32> %926, <16 x i32> %14, i32 2)
@@ -995,10 +993,10 @@ define dso_local void @_Z3dutP8bfloat16S0_(ptr noalias nocapture readonly %0, pt
   %964 = tail call <32 x bfloat> @llvm.aie2.upd.bf512.bf256(<32 x bfloat> %963, <16 x bfloat> %106, i32 1)
   %965 = tail call noundef <8 x i64> @llvm.aie2.bf.mul16.conf(<32 x bfloat> %962, <32 x bfloat> %964, i32 60)
   %966 = tail call noundef <16 x bfloat> @llvm.aie2.v16accfloat.to.v16bf16(<8 x i64> %965)
-  %967 = getelementptr inbounds %class.bfloat16, ptr %1, i20 304
+  %967 = getelementptr inbounds bfloat, ptr %1, i20 304
   store <16 x bfloat> %966, ptr %967, align 32, !tbaa !2
   %968 = bitcast <8 x i32> %928 to <16 x i16>
-  %969 = getelementptr %class.bfloat16, ptr %0, i20 368
+  %969 = getelementptr bfloat, ptr %0, i20 368
   %970 = load <16 x bfloat>, ptr %969, align 32, !tbaa !2
   %971 = tail call noundef <16 x i32> @llvm.aie2.v16bf16.to.v16i32(<16 x bfloat> %925, i32 8)
   %972 = tail call <16 x i32> @llvm.aie2.vshuffle(<16 x i32> %971, <16 x i32> %14, i32 2)
@@ -1041,10 +1039,10 @@ define dso_local void @_Z3dutP8bfloat16S0_(ptr noalias nocapture readonly %0, pt
   %1009 = tail call <32 x bfloat> @llvm.aie2.upd.bf512.bf256(<32 x bfloat> %1008, <16 x bfloat> %106, i32 1)
   %1010 = tail call noundef <8 x i64> @llvm.aie2.bf.mul16.conf(<32 x bfloat> %1007, <32 x bfloat> %1009, i32 60)
   %1011 = tail call noundef <16 x bfloat> @llvm.aie2.v16accfloat.to.v16bf16(<8 x i64> %1010)
-  %1012 = getelementptr inbounds %class.bfloat16, ptr %1, i20 320
+  %1012 = getelementptr inbounds bfloat, ptr %1, i20 320
   store <16 x bfloat> %1011, ptr %1012, align 32, !tbaa !2
   %1013 = bitcast <8 x i32> %973 to <16 x i16>
-  %1014 = getelementptr %class.bfloat16, ptr %0, i20 384
+  %1014 = getelementptr bfloat, ptr %0, i20 384
   %1015 = load <16 x bfloat>, ptr %1014, align 32, !tbaa !2
   %1016 = tail call noundef <16 x i32> @llvm.aie2.v16bf16.to.v16i32(<16 x bfloat> %970, i32 8)
   %1017 = tail call <16 x i32> @llvm.aie2.vshuffle(<16 x i32> %1016, <16 x i32> %14, i32 2)
@@ -1087,10 +1085,10 @@ define dso_local void @_Z3dutP8bfloat16S0_(ptr noalias nocapture readonly %0, pt
   %1054 = tail call <32 x bfloat> @llvm.aie2.upd.bf512.bf256(<32 x bfloat> %1053, <16 x bfloat> %106, i32 1)
   %1055 = tail call noundef <8 x i64> @llvm.aie2.bf.mul16.conf(<32 x bfloat> %1052, <32 x bfloat> %1054, i32 60)
   %1056 = tail call noundef <16 x bfloat> @llvm.aie2.v16accfloat.to.v16bf16(<8 x i64> %1055)
-  %1057 = getelementptr inbounds %class.bfloat16, ptr %1, i20 336
+  %1057 = getelementptr inbounds bfloat, ptr %1, i20 336
   store <16 x bfloat> %1056, ptr %1057, align 32, !tbaa !2
   %1058 = bitcast <8 x i32> %1018 to <16 x i16>
-  %1059 = getelementptr %class.bfloat16, ptr %0, i20 400
+  %1059 = getelementptr bfloat, ptr %0, i20 400
   %1060 = load <16 x bfloat>, ptr %1059, align 32, !tbaa !2
   %1061 = tail call noundef <16 x i32> @llvm.aie2.v16bf16.to.v16i32(<16 x bfloat> %1015, i32 8)
   %1062 = tail call <16 x i32> @llvm.aie2.vshuffle(<16 x i32> %1061, <16 x i32> %14, i32 2)
@@ -1133,10 +1131,10 @@ define dso_local void @_Z3dutP8bfloat16S0_(ptr noalias nocapture readonly %0, pt
   %1099 = tail call <32 x bfloat> @llvm.aie2.upd.bf512.bf256(<32 x bfloat> %1098, <16 x bfloat> %106, i32 1)
   %1100 = tail call noundef <8 x i64> @llvm.aie2.bf.mul16.conf(<32 x bfloat> %1097, <32 x bfloat> %1099, i32 60)
   %1101 = tail call noundef <16 x bfloat> @llvm.aie2.v16accfloat.to.v16bf16(<8 x i64> %1100)
-  %1102 = getelementptr inbounds %class.bfloat16, ptr %1, i20 352
+  %1102 = getelementptr inbounds bfloat, ptr %1, i20 352
   store <16 x bfloat> %1101, ptr %1102, align 32, !tbaa !2
   %1103 = bitcast <8 x i32> %1063 to <16 x i16>
-  %1104 = getelementptr %class.bfloat16, ptr %0, i20 416
+  %1104 = getelementptr bfloat, ptr %0, i20 416
   %1105 = load <16 x bfloat>, ptr %1104, align 32, !tbaa !2
   %1106 = tail call noundef <16 x i32> @llvm.aie2.v16bf16.to.v16i32(<16 x bfloat> %1060, i32 8)
   %1107 = tail call <16 x i32> @llvm.aie2.vshuffle(<16 x i32> %1106, <16 x i32> %14, i32 2)
@@ -1179,10 +1177,10 @@ define dso_local void @_Z3dutP8bfloat16S0_(ptr noalias nocapture readonly %0, pt
   %1144 = tail call <32 x bfloat> @llvm.aie2.upd.bf512.bf256(<32 x bfloat> %1143, <16 x bfloat> %106, i32 1)
   %1145 = tail call noundef <8 x i64> @llvm.aie2.bf.mul16.conf(<32 x bfloat> %1142, <32 x bfloat> %1144, i32 60)
   %1146 = tail call noundef <16 x bfloat> @llvm.aie2.v16accfloat.to.v16bf16(<8 x i64> %1145)
-  %1147 = getelementptr inbounds %class.bfloat16, ptr %1, i20 368
+  %1147 = getelementptr inbounds bfloat, ptr %1, i20 368
   store <16 x bfloat> %1146, ptr %1147, align 32, !tbaa !2
   %1148 = bitcast <8 x i32> %1108 to <16 x i16>
-  %1149 = getelementptr %class.bfloat16, ptr %0, i20 432
+  %1149 = getelementptr bfloat, ptr %0, i20 432
   %1150 = load <16 x bfloat>, ptr %1149, align 32, !tbaa !2
   %1151 = tail call noundef <16 x i32> @llvm.aie2.v16bf16.to.v16i32(<16 x bfloat> %1105, i32 8)
   %1152 = tail call <16 x i32> @llvm.aie2.vshuffle(<16 x i32> %1151, <16 x i32> %14, i32 2)
@@ -1225,10 +1223,10 @@ define dso_local void @_Z3dutP8bfloat16S0_(ptr noalias nocapture readonly %0, pt
   %1189 = tail call <32 x bfloat> @llvm.aie2.upd.bf512.bf256(<32 x bfloat> %1188, <16 x bfloat> %106, i32 1)
   %1190 = tail call noundef <8 x i64> @llvm.aie2.bf.mul16.conf(<32 x bfloat> %1187, <32 x bfloat> %1189, i32 60)
   %1191 = tail call noundef <16 x bfloat> @llvm.aie2.v16accfloat.to.v16bf16(<8 x i64> %1190)
-  %1192 = getelementptr inbounds %class.bfloat16, ptr %1, i20 384
+  %1192 = getelementptr inbounds bfloat, ptr %1, i20 384
   store <16 x bfloat> %1191, ptr %1192, align 32, !tbaa !2
   %1193 = bitcast <8 x i32> %1153 to <16 x i16>
-  %1194 = getelementptr %class.bfloat16, ptr %0, i20 448
+  %1194 = getelementptr bfloat, ptr %0, i20 448
   %1195 = load <16 x bfloat>, ptr %1194, align 32, !tbaa !2
   %1196 = tail call noundef <16 x i32> @llvm.aie2.v16bf16.to.v16i32(<16 x bfloat> %1150, i32 8)
   %1197 = tail call <16 x i32> @llvm.aie2.vshuffle(<16 x i32> %1196, <16 x i32> %14, i32 2)
@@ -1271,10 +1269,10 @@ define dso_local void @_Z3dutP8bfloat16S0_(ptr noalias nocapture readonly %0, pt
   %1234 = tail call <32 x bfloat> @llvm.aie2.upd.bf512.bf256(<32 x bfloat> %1233, <16 x bfloat> %106, i32 1)
   %1235 = tail call noundef <8 x i64> @llvm.aie2.bf.mul16.conf(<32 x bfloat> %1232, <32 x bfloat> %1234, i32 60)
   %1236 = tail call noundef <16 x bfloat> @llvm.aie2.v16accfloat.to.v16bf16(<8 x i64> %1235)
-  %1237 = getelementptr inbounds %class.bfloat16, ptr %1, i20 400
+  %1237 = getelementptr inbounds bfloat, ptr %1, i20 400
   store <16 x bfloat> %1236, ptr %1237, align 32, !tbaa !2
   %1238 = bitcast <8 x i32> %1198 to <16 x i16>
-  %1239 = getelementptr %class.bfloat16, ptr %0, i20 464
+  %1239 = getelementptr bfloat, ptr %0, i20 464
   %1240 = load <16 x bfloat>, ptr %1239, align 32, !tbaa !2
   %1241 = tail call noundef <16 x i32> @llvm.aie2.v16bf16.to.v16i32(<16 x bfloat> %1195, i32 8)
   %1242 = tail call <16 x i32> @llvm.aie2.vshuffle(<16 x i32> %1241, <16 x i32> %14, i32 2)
@@ -1317,10 +1315,10 @@ define dso_local void @_Z3dutP8bfloat16S0_(ptr noalias nocapture readonly %0, pt
   %1279 = tail call <32 x bfloat> @llvm.aie2.upd.bf512.bf256(<32 x bfloat> %1278, <16 x bfloat> %106, i32 1)
   %1280 = tail call noundef <8 x i64> @llvm.aie2.bf.mul16.conf(<32 x bfloat> %1277, <32 x bfloat> %1279, i32 60)
   %1281 = tail call noundef <16 x bfloat> @llvm.aie2.v16accfloat.to.v16bf16(<8 x i64> %1280)
-  %1282 = getelementptr inbounds %class.bfloat16, ptr %1, i20 416
+  %1282 = getelementptr inbounds bfloat, ptr %1, i20 416
   store <16 x bfloat> %1281, ptr %1282, align 32, !tbaa !2
   %1283 = bitcast <8 x i32> %1243 to <16 x i16>
-  %1284 = getelementptr %class.bfloat16, ptr %0, i20 480
+  %1284 = getelementptr bfloat, ptr %0, i20 480
   %1285 = load <16 x bfloat>, ptr %1284, align 32, !tbaa !2
   %1286 = tail call noundef <16 x i32> @llvm.aie2.v16bf16.to.v16i32(<16 x bfloat> %1240, i32 8)
   %1287 = tail call <16 x i32> @llvm.aie2.vshuffle(<16 x i32> %1286, <16 x i32> %14, i32 2)
@@ -1363,10 +1361,10 @@ define dso_local void @_Z3dutP8bfloat16S0_(ptr noalias nocapture readonly %0, pt
   %1324 = tail call <32 x bfloat> @llvm.aie2.upd.bf512.bf256(<32 x bfloat> %1323, <16 x bfloat> %106, i32 1)
   %1325 = tail call noundef <8 x i64> @llvm.aie2.bf.mul16.conf(<32 x bfloat> %1322, <32 x bfloat> %1324, i32 60)
   %1326 = tail call noundef <16 x bfloat> @llvm.aie2.v16accfloat.to.v16bf16(<8 x i64> %1325)
-  %1327 = getelementptr inbounds %class.bfloat16, ptr %1, i20 432
+  %1327 = getelementptr inbounds bfloat, ptr %1, i20 432
   store <16 x bfloat> %1326, ptr %1327, align 32, !tbaa !2
   %1328 = bitcast <8 x i32> %1288 to <16 x i16>
-  %1329 = getelementptr %class.bfloat16, ptr %0, i20 496
+  %1329 = getelementptr bfloat, ptr %0, i20 496
   %1330 = load <16 x bfloat>, ptr %1329, align 32, !tbaa !2
   %1331 = tail call noundef <16 x i32> @llvm.aie2.v16bf16.to.v16i32(<16 x bfloat> %1285, i32 8)
   %1332 = tail call <16 x i32> @llvm.aie2.vshuffle(<16 x i32> %1331, <16 x i32> %14, i32 2)
@@ -1409,10 +1407,10 @@ define dso_local void @_Z3dutP8bfloat16S0_(ptr noalias nocapture readonly %0, pt
   %1369 = tail call <32 x bfloat> @llvm.aie2.upd.bf512.bf256(<32 x bfloat> %1368, <16 x bfloat> %106, i32 1)
   %1370 = tail call noundef <8 x i64> @llvm.aie2.bf.mul16.conf(<32 x bfloat> %1367, <32 x bfloat> %1369, i32 60)
   %1371 = tail call noundef <16 x bfloat> @llvm.aie2.v16accfloat.to.v16bf16(<8 x i64> %1370)
-  %1372 = getelementptr inbounds %class.bfloat16, ptr %1, i20 448
+  %1372 = getelementptr inbounds bfloat, ptr %1, i20 448
   store <16 x bfloat> %1371, ptr %1372, align 32, !tbaa !2
   %1373 = bitcast <8 x i32> %1333 to <16 x i16>
-  %1374 = getelementptr %class.bfloat16, ptr %0, i20 512
+  %1374 = getelementptr bfloat, ptr %0, i20 512
   %1375 = load <16 x bfloat>, ptr %1374, align 32, !tbaa !2
   %1376 = tail call noundef <16 x i32> @llvm.aie2.v16bf16.to.v16i32(<16 x bfloat> %1330, i32 8)
   %1377 = tail call <16 x i32> @llvm.aie2.vshuffle(<16 x i32> %1376, <16 x i32> %14, i32 2)
@@ -1455,10 +1453,10 @@ define dso_local void @_Z3dutP8bfloat16S0_(ptr noalias nocapture readonly %0, pt
   %1414 = tail call <32 x bfloat> @llvm.aie2.upd.bf512.bf256(<32 x bfloat> %1413, <16 x bfloat> %106, i32 1)
   %1415 = tail call noundef <8 x i64> @llvm.aie2.bf.mul16.conf(<32 x bfloat> %1412, <32 x bfloat> %1414, i32 60)
   %1416 = tail call noundef <16 x bfloat> @llvm.aie2.v16accfloat.to.v16bf16(<8 x i64> %1415)
-  %1417 = getelementptr inbounds %class.bfloat16, ptr %1, i20 464
+  %1417 = getelementptr inbounds bfloat, ptr %1, i20 464
   store <16 x bfloat> %1416, ptr %1417, align 32, !tbaa !2
   %1418 = bitcast <8 x i32> %1378 to <16 x i16>
-  %1419 = getelementptr %class.bfloat16, ptr %0, i20 528
+  %1419 = getelementptr bfloat, ptr %0, i20 528
   %1420 = load <16 x bfloat>, ptr %1419, align 32, !tbaa !2
   %1421 = tail call noundef <16 x i32> @llvm.aie2.v16bf16.to.v16i32(<16 x bfloat> %1375, i32 8)
   %1422 = tail call <16 x i32> @llvm.aie2.vshuffle(<16 x i32> %1421, <16 x i32> %14, i32 2)
@@ -1501,10 +1499,10 @@ define dso_local void @_Z3dutP8bfloat16S0_(ptr noalias nocapture readonly %0, pt
   %1459 = tail call <32 x bfloat> @llvm.aie2.upd.bf512.bf256(<32 x bfloat> %1458, <16 x bfloat> %106, i32 1)
   %1460 = tail call noundef <8 x i64> @llvm.aie2.bf.mul16.conf(<32 x bfloat> %1457, <32 x bfloat> %1459, i32 60)
   %1461 = tail call noundef <16 x bfloat> @llvm.aie2.v16accfloat.to.v16bf16(<8 x i64> %1460)
-  %1462 = getelementptr inbounds %class.bfloat16, ptr %1, i20 480
+  %1462 = getelementptr inbounds bfloat, ptr %1, i20 480
   store <16 x bfloat> %1461, ptr %1462, align 32, !tbaa !2
   %1463 = bitcast <8 x i32> %1423 to <16 x i16>
-  %1464 = getelementptr %class.bfloat16, ptr %0, i20 544
+  %1464 = getelementptr bfloat, ptr %0, i20 544
   %1465 = load <16 x bfloat>, ptr %1464, align 32, !tbaa !2
   %1466 = tail call noundef <16 x i32> @llvm.aie2.v16bf16.to.v16i32(<16 x bfloat> %1420, i32 8)
   %1467 = tail call <16 x i32> @llvm.aie2.vshuffle(<16 x i32> %1466, <16 x i32> %14, i32 2)
@@ -1547,10 +1545,10 @@ define dso_local void @_Z3dutP8bfloat16S0_(ptr noalias nocapture readonly %0, pt
   %1504 = tail call <32 x bfloat> @llvm.aie2.upd.bf512.bf256(<32 x bfloat> %1503, <16 x bfloat> %106, i32 1)
   %1505 = tail call noundef <8 x i64> @llvm.aie2.bf.mul16.conf(<32 x bfloat> %1502, <32 x bfloat> %1504, i32 60)
   %1506 = tail call noundef <16 x bfloat> @llvm.aie2.v16accfloat.to.v16bf16(<8 x i64> %1505)
-  %1507 = getelementptr inbounds %class.bfloat16, ptr %1, i20 496
+  %1507 = getelementptr inbounds bfloat, ptr %1, i20 496
   store <16 x bfloat> %1506, ptr %1507, align 32, !tbaa !2
   %1508 = bitcast <8 x i32> %1468 to <16 x i16>
-  %1509 = getelementptr %class.bfloat16, ptr %0, i20 560
+  %1509 = getelementptr bfloat, ptr %0, i20 560
   %1510 = load <16 x bfloat>, ptr %1509, align 32, !tbaa !2
   %1511 = tail call noundef <16 x i32> @llvm.aie2.v16bf16.to.v16i32(<16 x bfloat> %1465, i32 8)
   %1512 = tail call <16 x i32> @llvm.aie2.vshuffle(<16 x i32> %1511, <16 x i32> %14, i32 2)
@@ -1593,10 +1591,10 @@ define dso_local void @_Z3dutP8bfloat16S0_(ptr noalias nocapture readonly %0, pt
   %1549 = tail call <32 x bfloat> @llvm.aie2.upd.bf512.bf256(<32 x bfloat> %1548, <16 x bfloat> %106, i32 1)
   %1550 = tail call noundef <8 x i64> @llvm.aie2.bf.mul16.conf(<32 x bfloat> %1547, <32 x bfloat> %1549, i32 60)
   %1551 = tail call noundef <16 x bfloat> @llvm.aie2.v16accfloat.to.v16bf16(<8 x i64> %1550)
-  %1552 = getelementptr inbounds %class.bfloat16, ptr %1, i20 512
+  %1552 = getelementptr inbounds bfloat, ptr %1, i20 512
   store <16 x bfloat> %1551, ptr %1552, align 32, !tbaa !2
   %1553 = bitcast <8 x i32> %1513 to <16 x i16>
-  %1554 = getelementptr %class.bfloat16, ptr %0, i20 576
+  %1554 = getelementptr bfloat, ptr %0, i20 576
   %1555 = load <16 x bfloat>, ptr %1554, align 32, !tbaa !2
   %1556 = tail call noundef <16 x i32> @llvm.aie2.v16bf16.to.v16i32(<16 x bfloat> %1510, i32 8)
   %1557 = tail call <16 x i32> @llvm.aie2.vshuffle(<16 x i32> %1556, <16 x i32> %14, i32 2)
@@ -1639,10 +1637,10 @@ define dso_local void @_Z3dutP8bfloat16S0_(ptr noalias nocapture readonly %0, pt
   %1594 = tail call <32 x bfloat> @llvm.aie2.upd.bf512.bf256(<32 x bfloat> %1593, <16 x bfloat> %106, i32 1)
   %1595 = tail call noundef <8 x i64> @llvm.aie2.bf.mul16.conf(<32 x bfloat> %1592, <32 x bfloat> %1594, i32 60)
   %1596 = tail call noundef <16 x bfloat> @llvm.aie2.v16accfloat.to.v16bf16(<8 x i64> %1595)
-  %1597 = getelementptr inbounds %class.bfloat16, ptr %1, i20 528
+  %1597 = getelementptr inbounds bfloat, ptr %1, i20 528
   store <16 x bfloat> %1596, ptr %1597, align 32, !tbaa !2
   %1598 = bitcast <8 x i32> %1558 to <16 x i16>
-  %1599 = getelementptr %class.bfloat16, ptr %0, i20 592
+  %1599 = getelementptr bfloat, ptr %0, i20 592
   %1600 = load <16 x bfloat>, ptr %1599, align 32, !tbaa !2
   %1601 = tail call noundef <16 x i32> @llvm.aie2.v16bf16.to.v16i32(<16 x bfloat> %1555, i32 8)
   %1602 = tail call <16 x i32> @llvm.aie2.vshuffle(<16 x i32> %1601, <16 x i32> %14, i32 2)
@@ -1685,10 +1683,10 @@ define dso_local void @_Z3dutP8bfloat16S0_(ptr noalias nocapture readonly %0, pt
   %1639 = tail call <32 x bfloat> @llvm.aie2.upd.bf512.bf256(<32 x bfloat> %1638, <16 x bfloat> %106, i32 1)
   %1640 = tail call noundef <8 x i64> @llvm.aie2.bf.mul16.conf(<32 x bfloat> %1637, <32 x bfloat> %1639, i32 60)
   %1641 = tail call noundef <16 x bfloat> @llvm.aie2.v16accfloat.to.v16bf16(<8 x i64> %1640)
-  %1642 = getelementptr inbounds %class.bfloat16, ptr %1, i20 544
+  %1642 = getelementptr inbounds bfloat, ptr %1, i20 544
   store <16 x bfloat> %1641, ptr %1642, align 32, !tbaa !2
   %1643 = bitcast <8 x i32> %1603 to <16 x i16>
-  %1644 = getelementptr %class.bfloat16, ptr %0, i20 608
+  %1644 = getelementptr bfloat, ptr %0, i20 608
   %1645 = load <16 x bfloat>, ptr %1644, align 32, !tbaa !2
   %1646 = tail call noundef <16 x i32> @llvm.aie2.v16bf16.to.v16i32(<16 x bfloat> %1600, i32 8)
   %1647 = tail call <16 x i32> @llvm.aie2.vshuffle(<16 x i32> %1646, <16 x i32> %14, i32 2)
@@ -1731,10 +1729,10 @@ define dso_local void @_Z3dutP8bfloat16S0_(ptr noalias nocapture readonly %0, pt
   %1684 = tail call <32 x bfloat> @llvm.aie2.upd.bf512.bf256(<32 x bfloat> %1683, <16 x bfloat> %106, i32 1)
   %1685 = tail call noundef <8 x i64> @llvm.aie2.bf.mul16.conf(<32 x bfloat> %1682, <32 x bfloat> %1684, i32 60)
   %1686 = tail call noundef <16 x bfloat> @llvm.aie2.v16accfloat.to.v16bf16(<8 x i64> %1685)
-  %1687 = getelementptr inbounds %class.bfloat16, ptr %1, i20 560
+  %1687 = getelementptr inbounds bfloat, ptr %1, i20 560
   store <16 x bfloat> %1686, ptr %1687, align 32, !tbaa !2
   %1688 = bitcast <8 x i32> %1648 to <16 x i16>
-  %1689 = getelementptr %class.bfloat16, ptr %0, i20 624
+  %1689 = getelementptr bfloat, ptr %0, i20 624
   %1690 = load <16 x bfloat>, ptr %1689, align 32, !tbaa !2
   %1691 = tail call noundef <16 x i32> @llvm.aie2.v16bf16.to.v16i32(<16 x bfloat> %1645, i32 8)
   %1692 = tail call <16 x i32> @llvm.aie2.vshuffle(<16 x i32> %1691, <16 x i32> %14, i32 2)
@@ -1777,10 +1775,10 @@ define dso_local void @_Z3dutP8bfloat16S0_(ptr noalias nocapture readonly %0, pt
   %1729 = tail call <32 x bfloat> @llvm.aie2.upd.bf512.bf256(<32 x bfloat> %1728, <16 x bfloat> %106, i32 1)
   %1730 = tail call noundef <8 x i64> @llvm.aie2.bf.mul16.conf(<32 x bfloat> %1727, <32 x bfloat> %1729, i32 60)
   %1731 = tail call noundef <16 x bfloat> @llvm.aie2.v16accfloat.to.v16bf16(<8 x i64> %1730)
-  %1732 = getelementptr inbounds %class.bfloat16, ptr %1, i20 576
+  %1732 = getelementptr inbounds bfloat, ptr %1, i20 576
   store <16 x bfloat> %1731, ptr %1732, align 32, !tbaa !2
   %1733 = bitcast <8 x i32> %1693 to <16 x i16>
-  %1734 = getelementptr %class.bfloat16, ptr %0, i20 640
+  %1734 = getelementptr bfloat, ptr %0, i20 640
   %1735 = load <16 x bfloat>, ptr %1734, align 32, !tbaa !2
   %1736 = tail call noundef <16 x i32> @llvm.aie2.v16bf16.to.v16i32(<16 x bfloat> %1690, i32 8)
   %1737 = tail call <16 x i32> @llvm.aie2.vshuffle(<16 x i32> %1736, <16 x i32> %14, i32 2)
@@ -1823,10 +1821,10 @@ define dso_local void @_Z3dutP8bfloat16S0_(ptr noalias nocapture readonly %0, pt
   %1774 = tail call <32 x bfloat> @llvm.aie2.upd.bf512.bf256(<32 x bfloat> %1773, <16 x bfloat> %106, i32 1)
   %1775 = tail call noundef <8 x i64> @llvm.aie2.bf.mul16.conf(<32 x bfloat> %1772, <32 x bfloat> %1774, i32 60)
   %1776 = tail call noundef <16 x bfloat> @llvm.aie2.v16accfloat.to.v16bf16(<8 x i64> %1775)
-  %1777 = getelementptr inbounds %class.bfloat16, ptr %1, i20 592
+  %1777 = getelementptr inbounds bfloat, ptr %1, i20 592
   store <16 x bfloat> %1776, ptr %1777, align 32, !tbaa !2
   %1778 = bitcast <8 x i32> %1738 to <16 x i16>
-  %1779 = getelementptr %class.bfloat16, ptr %0, i20 656
+  %1779 = getelementptr bfloat, ptr %0, i20 656
   %1780 = load <16 x bfloat>, ptr %1779, align 32, !tbaa !2
   %1781 = tail call noundef <16 x i32> @llvm.aie2.v16bf16.to.v16i32(<16 x bfloat> %1735, i32 8)
   %1782 = tail call <16 x i32> @llvm.aie2.vshuffle(<16 x i32> %1781, <16 x i32> %14, i32 2)
@@ -1869,10 +1867,10 @@ define dso_local void @_Z3dutP8bfloat16S0_(ptr noalias nocapture readonly %0, pt
   %1819 = tail call <32 x bfloat> @llvm.aie2.upd.bf512.bf256(<32 x bfloat> %1818, <16 x bfloat> %106, i32 1)
   %1820 = tail call noundef <8 x i64> @llvm.aie2.bf.mul16.conf(<32 x bfloat> %1817, <32 x bfloat> %1819, i32 60)
   %1821 = tail call noundef <16 x bfloat> @llvm.aie2.v16accfloat.to.v16bf16(<8 x i64> %1820)
-  %1822 = getelementptr inbounds %class.bfloat16, ptr %1, i20 608
+  %1822 = getelementptr inbounds bfloat, ptr %1, i20 608
   store <16 x bfloat> %1821, ptr %1822, align 32, !tbaa !2
   %1823 = bitcast <8 x i32> %1783 to <16 x i16>
-  %1824 = getelementptr %class.bfloat16, ptr %0, i20 672
+  %1824 = getelementptr bfloat, ptr %0, i20 672
   %1825 = load <16 x bfloat>, ptr %1824, align 32, !tbaa !2
   %1826 = tail call noundef <16 x i32> @llvm.aie2.v16bf16.to.v16i32(<16 x bfloat> %1780, i32 8)
   %1827 = tail call <16 x i32> @llvm.aie2.vshuffle(<16 x i32> %1826, <16 x i32> %14, i32 2)
@@ -1915,10 +1913,10 @@ define dso_local void @_Z3dutP8bfloat16S0_(ptr noalias nocapture readonly %0, pt
   %1864 = tail call <32 x bfloat> @llvm.aie2.upd.bf512.bf256(<32 x bfloat> %1863, <16 x bfloat> %106, i32 1)
   %1865 = tail call noundef <8 x i64> @llvm.aie2.bf.mul16.conf(<32 x bfloat> %1862, <32 x bfloat> %1864, i32 60)
   %1866 = tail call noundef <16 x bfloat> @llvm.aie2.v16accfloat.to.v16bf16(<8 x i64> %1865)
-  %1867 = getelementptr inbounds %class.bfloat16, ptr %1, i20 624
+  %1867 = getelementptr inbounds bfloat, ptr %1, i20 624
   store <16 x bfloat> %1866, ptr %1867, align 32, !tbaa !2
   %1868 = bitcast <8 x i32> %1828 to <16 x i16>
-  %1869 = getelementptr %class.bfloat16, ptr %0, i20 688
+  %1869 = getelementptr bfloat, ptr %0, i20 688
   %1870 = load <16 x bfloat>, ptr %1869, align 32, !tbaa !2
   %1871 = tail call noundef <16 x i32> @llvm.aie2.v16bf16.to.v16i32(<16 x bfloat> %1825, i32 8)
   %1872 = tail call <16 x i32> @llvm.aie2.vshuffle(<16 x i32> %1871, <16 x i32> %14, i32 2)
@@ -1961,10 +1959,10 @@ define dso_local void @_Z3dutP8bfloat16S0_(ptr noalias nocapture readonly %0, pt
   %1909 = tail call <32 x bfloat> @llvm.aie2.upd.bf512.bf256(<32 x bfloat> %1908, <16 x bfloat> %106, i32 1)
   %1910 = tail call noundef <8 x i64> @llvm.aie2.bf.mul16.conf(<32 x bfloat> %1907, <32 x bfloat> %1909, i32 60)
   %1911 = tail call noundef <16 x bfloat> @llvm.aie2.v16accfloat.to.v16bf16(<8 x i64> %1910)
-  %1912 = getelementptr inbounds %class.bfloat16, ptr %1, i20 640
+  %1912 = getelementptr inbounds bfloat, ptr %1, i20 640
   store <16 x bfloat> %1911, ptr %1912, align 32, !tbaa !2
   %1913 = bitcast <8 x i32> %1873 to <16 x i16>
-  %1914 = getelementptr %class.bfloat16, ptr %0, i20 704
+  %1914 = getelementptr bfloat, ptr %0, i20 704
   %1915 = load <16 x bfloat>, ptr %1914, align 32, !tbaa !2
   %1916 = tail call noundef <16 x i32> @llvm.aie2.v16bf16.to.v16i32(<16 x bfloat> %1870, i32 8)
   %1917 = tail call <16 x i32> @llvm.aie2.vshuffle(<16 x i32> %1916, <16 x i32> %14, i32 2)
@@ -2007,10 +2005,10 @@ define dso_local void @_Z3dutP8bfloat16S0_(ptr noalias nocapture readonly %0, pt
   %1954 = tail call <32 x bfloat> @llvm.aie2.upd.bf512.bf256(<32 x bfloat> %1953, <16 x bfloat> %106, i32 1)
   %1955 = tail call noundef <8 x i64> @llvm.aie2.bf.mul16.conf(<32 x bfloat> %1952, <32 x bfloat> %1954, i32 60)
   %1956 = tail call noundef <16 x bfloat> @llvm.aie2.v16accfloat.to.v16bf16(<8 x i64> %1955)
-  %1957 = getelementptr inbounds %class.bfloat16, ptr %1, i20 656
+  %1957 = getelementptr inbounds bfloat, ptr %1, i20 656
   store <16 x bfloat> %1956, ptr %1957, align 32, !tbaa !2
   %1958 = bitcast <8 x i32> %1918 to <16 x i16>
-  %1959 = getelementptr %class.bfloat16, ptr %0, i20 720
+  %1959 = getelementptr bfloat, ptr %0, i20 720
   %1960 = load <16 x bfloat>, ptr %1959, align 32, !tbaa !2
   %1961 = tail call noundef <16 x i32> @llvm.aie2.v16bf16.to.v16i32(<16 x bfloat> %1915, i32 8)
   %1962 = tail call <16 x i32> @llvm.aie2.vshuffle(<16 x i32> %1961, <16 x i32> %14, i32 2)
@@ -2053,10 +2051,10 @@ define dso_local void @_Z3dutP8bfloat16S0_(ptr noalias nocapture readonly %0, pt
   %1999 = tail call <32 x bfloat> @llvm.aie2.upd.bf512.bf256(<32 x bfloat> %1998, <16 x bfloat> %106, i32 1)
   %2000 = tail call noundef <8 x i64> @llvm.aie2.bf.mul16.conf(<32 x bfloat> %1997, <32 x bfloat> %1999, i32 60)
   %2001 = tail call noundef <16 x bfloat> @llvm.aie2.v16accfloat.to.v16bf16(<8 x i64> %2000)
-  %2002 = getelementptr inbounds %class.bfloat16, ptr %1, i20 672
+  %2002 = getelementptr inbounds bfloat, ptr %1, i20 672
   store <16 x bfloat> %2001, ptr %2002, align 32, !tbaa !2
   %2003 = bitcast <8 x i32> %1963 to <16 x i16>
-  %2004 = getelementptr %class.bfloat16, ptr %0, i20 736
+  %2004 = getelementptr bfloat, ptr %0, i20 736
   %2005 = load <16 x bfloat>, ptr %2004, align 32, !tbaa !2
   %2006 = tail call noundef <16 x i32> @llvm.aie2.v16bf16.to.v16i32(<16 x bfloat> %1960, i32 8)
   %2007 = tail call <16 x i32> @llvm.aie2.vshuffle(<16 x i32> %2006, <16 x i32> %14, i32 2)
@@ -2099,10 +2097,10 @@ define dso_local void @_Z3dutP8bfloat16S0_(ptr noalias nocapture readonly %0, pt
   %2044 = tail call <32 x bfloat> @llvm.aie2.upd.bf512.bf256(<32 x bfloat> %2043, <16 x bfloat> %106, i32 1)
   %2045 = tail call noundef <8 x i64> @llvm.aie2.bf.mul16.conf(<32 x bfloat> %2042, <32 x bfloat> %2044, i32 60)
   %2046 = tail call noundef <16 x bfloat> @llvm.aie2.v16accfloat.to.v16bf16(<8 x i64> %2045)
-  %2047 = getelementptr inbounds %class.bfloat16, ptr %1, i20 688
+  %2047 = getelementptr inbounds bfloat, ptr %1, i20 688
   store <16 x bfloat> %2046, ptr %2047, align 32, !tbaa !2
   %2048 = bitcast <8 x i32> %2008 to <16 x i16>
-  %2049 = getelementptr %class.bfloat16, ptr %0, i20 752
+  %2049 = getelementptr bfloat, ptr %0, i20 752
   %2050 = load <16 x bfloat>, ptr %2049, align 32, !tbaa !2
   %2051 = tail call noundef <16 x i32> @llvm.aie2.v16bf16.to.v16i32(<16 x bfloat> %2005, i32 8)
   %2052 = tail call <16 x i32> @llvm.aie2.vshuffle(<16 x i32> %2051, <16 x i32> %14, i32 2)
@@ -2145,10 +2143,10 @@ define dso_local void @_Z3dutP8bfloat16S0_(ptr noalias nocapture readonly %0, pt
   %2089 = tail call <32 x bfloat> @llvm.aie2.upd.bf512.bf256(<32 x bfloat> %2088, <16 x bfloat> %106, i32 1)
   %2090 = tail call noundef <8 x i64> @llvm.aie2.bf.mul16.conf(<32 x bfloat> %2087, <32 x bfloat> %2089, i32 60)
   %2091 = tail call noundef <16 x bfloat> @llvm.aie2.v16accfloat.to.v16bf16(<8 x i64> %2090)
-  %2092 = getelementptr inbounds %class.bfloat16, ptr %1, i20 704
+  %2092 = getelementptr inbounds bfloat, ptr %1, i20 704
   store <16 x bfloat> %2091, ptr %2092, align 32, !tbaa !2
   %2093 = bitcast <8 x i32> %2053 to <16 x i16>
-  %2094 = getelementptr %class.bfloat16, ptr %0, i20 768
+  %2094 = getelementptr bfloat, ptr %0, i20 768
   %2095 = load <16 x bfloat>, ptr %2094, align 32, !tbaa !2
   %2096 = tail call noundef <16 x i32> @llvm.aie2.v16bf16.to.v16i32(<16 x bfloat> %2050, i32 8)
   %2097 = tail call <16 x i32> @llvm.aie2.vshuffle(<16 x i32> %2096, <16 x i32> %14, i32 2)
@@ -2191,10 +2189,10 @@ define dso_local void @_Z3dutP8bfloat16S0_(ptr noalias nocapture readonly %0, pt
   %2134 = tail call <32 x bfloat> @llvm.aie2.upd.bf512.bf256(<32 x bfloat> %2133, <16 x bfloat> %106, i32 1)
   %2135 = tail call noundef <8 x i64> @llvm.aie2.bf.mul16.conf(<32 x bfloat> %2132, <32 x bfloat> %2134, i32 60)
   %2136 = tail call noundef <16 x bfloat> @llvm.aie2.v16accfloat.to.v16bf16(<8 x i64> %2135)
-  %2137 = getelementptr inbounds %class.bfloat16, ptr %1, i20 720
+  %2137 = getelementptr inbounds bfloat, ptr %1, i20 720
   store <16 x bfloat> %2136, ptr %2137, align 32, !tbaa !2
   %2138 = bitcast <8 x i32> %2098 to <16 x i16>
-  %2139 = getelementptr %class.bfloat16, ptr %0, i20 784
+  %2139 = getelementptr bfloat, ptr %0, i20 784
   %2140 = load <16 x bfloat>, ptr %2139, align 32, !tbaa !2
   %2141 = tail call noundef <16 x i32> @llvm.aie2.v16bf16.to.v16i32(<16 x bfloat> %2095, i32 8)
   %2142 = tail call <16 x i32> @llvm.aie2.vshuffle(<16 x i32> %2141, <16 x i32> %14, i32 2)
@@ -2237,10 +2235,10 @@ define dso_local void @_Z3dutP8bfloat16S0_(ptr noalias nocapture readonly %0, pt
   %2179 = tail call <32 x bfloat> @llvm.aie2.upd.bf512.bf256(<32 x bfloat> %2178, <16 x bfloat> %106, i32 1)
   %2180 = tail call noundef <8 x i64> @llvm.aie2.bf.mul16.conf(<32 x bfloat> %2177, <32 x bfloat> %2179, i32 60)
   %2181 = tail call noundef <16 x bfloat> @llvm.aie2.v16accfloat.to.v16bf16(<8 x i64> %2180)
-  %2182 = getelementptr inbounds %class.bfloat16, ptr %1, i20 736
+  %2182 = getelementptr inbounds bfloat, ptr %1, i20 736
   store <16 x bfloat> %2181, ptr %2182, align 32, !tbaa !2
   %2183 = bitcast <8 x i32> %2143 to <16 x i16>
-  %2184 = getelementptr %class.bfloat16, ptr %0, i20 800
+  %2184 = getelementptr bfloat, ptr %0, i20 800
   %2185 = load <16 x bfloat>, ptr %2184, align 32, !tbaa !2
   %2186 = tail call noundef <16 x i32> @llvm.aie2.v16bf16.to.v16i32(<16 x bfloat> %2140, i32 8)
   %2187 = tail call <16 x i32> @llvm.aie2.vshuffle(<16 x i32> %2186, <16 x i32> %14, i32 2)
@@ -2283,10 +2281,10 @@ define dso_local void @_Z3dutP8bfloat16S0_(ptr noalias nocapture readonly %0, pt
   %2224 = tail call <32 x bfloat> @llvm.aie2.upd.bf512.bf256(<32 x bfloat> %2223, <16 x bfloat> %106, i32 1)
   %2225 = tail call noundef <8 x i64> @llvm.aie2.bf.mul16.conf(<32 x bfloat> %2222, <32 x bfloat> %2224, i32 60)
   %2226 = tail call noundef <16 x bfloat> @llvm.aie2.v16accfloat.to.v16bf16(<8 x i64> %2225)
-  %2227 = getelementptr inbounds %class.bfloat16, ptr %1, i20 752
+  %2227 = getelementptr inbounds bfloat, ptr %1, i20 752
   store <16 x bfloat> %2226, ptr %2227, align 32, !tbaa !2
   %2228 = bitcast <8 x i32> %2188 to <16 x i16>
-  %2229 = getelementptr %class.bfloat16, ptr %0, i20 816
+  %2229 = getelementptr bfloat, ptr %0, i20 816
   %2230 = load <16 x bfloat>, ptr %2229, align 32, !tbaa !2
   %2231 = tail call noundef <16 x i32> @llvm.aie2.v16bf16.to.v16i32(<16 x bfloat> %2185, i32 8)
   %2232 = tail call <16 x i32> @llvm.aie2.vshuffle(<16 x i32> %2231, <16 x i32> %14, i32 2)
@@ -2329,10 +2327,10 @@ define dso_local void @_Z3dutP8bfloat16S0_(ptr noalias nocapture readonly %0, pt
   %2269 = tail call <32 x bfloat> @llvm.aie2.upd.bf512.bf256(<32 x bfloat> %2268, <16 x bfloat> %106, i32 1)
   %2270 = tail call noundef <8 x i64> @llvm.aie2.bf.mul16.conf(<32 x bfloat> %2267, <32 x bfloat> %2269, i32 60)
   %2271 = tail call noundef <16 x bfloat> @llvm.aie2.v16accfloat.to.v16bf16(<8 x i64> %2270)
-  %2272 = getelementptr inbounds %class.bfloat16, ptr %1, i20 768
+  %2272 = getelementptr inbounds bfloat, ptr %1, i20 768
   store <16 x bfloat> %2271, ptr %2272, align 32, !tbaa !2
   %2273 = bitcast <8 x i32> %2233 to <16 x i16>
-  %2274 = getelementptr %class.bfloat16, ptr %0, i20 832
+  %2274 = getelementptr bfloat, ptr %0, i20 832
   %2275 = load <16 x bfloat>, ptr %2274, align 32, !tbaa !2
   %2276 = tail call noundef <16 x i32> @llvm.aie2.v16bf16.to.v16i32(<16 x bfloat> %2230, i32 8)
   %2277 = tail call <16 x i32> @llvm.aie2.vshuffle(<16 x i32> %2276, <16 x i32> %14, i32 2)
@@ -2375,10 +2373,10 @@ define dso_local void @_Z3dutP8bfloat16S0_(ptr noalias nocapture readonly %0, pt
   %2314 = tail call <32 x bfloat> @llvm.aie2.upd.bf512.bf256(<32 x bfloat> %2313, <16 x bfloat> %106, i32 1)
   %2315 = tail call noundef <8 x i64> @llvm.aie2.bf.mul16.conf(<32 x bfloat> %2312, <32 x bfloat> %2314, i32 60)
   %2316 = tail call noundef <16 x bfloat> @llvm.aie2.v16accfloat.to.v16bf16(<8 x i64> %2315)
-  %2317 = getelementptr inbounds %class.bfloat16, ptr %1, i20 784
+  %2317 = getelementptr inbounds bfloat, ptr %1, i20 784
   store <16 x bfloat> %2316, ptr %2317, align 32, !tbaa !2
   %2318 = bitcast <8 x i32> %2278 to <16 x i16>
-  %2319 = getelementptr %class.bfloat16, ptr %0, i20 848
+  %2319 = getelementptr bfloat, ptr %0, i20 848
   %2320 = load <16 x bfloat>, ptr %2319, align 32, !tbaa !2
   %2321 = tail call noundef <16 x i32> @llvm.aie2.v16bf16.to.v16i32(<16 x bfloat> %2275, i32 8)
   %2322 = tail call <16 x i32> @llvm.aie2.vshuffle(<16 x i32> %2321, <16 x i32> %14, i32 2)
@@ -2421,10 +2419,10 @@ define dso_local void @_Z3dutP8bfloat16S0_(ptr noalias nocapture readonly %0, pt
   %2359 = tail call <32 x bfloat> @llvm.aie2.upd.bf512.bf256(<32 x bfloat> %2358, <16 x bfloat> %106, i32 1)
   %2360 = tail call noundef <8 x i64> @llvm.aie2.bf.mul16.conf(<32 x bfloat> %2357, <32 x bfloat> %2359, i32 60)
   %2361 = tail call noundef <16 x bfloat> @llvm.aie2.v16accfloat.to.v16bf16(<8 x i64> %2360)
-  %2362 = getelementptr inbounds %class.bfloat16, ptr %1, i20 800
+  %2362 = getelementptr inbounds bfloat, ptr %1, i20 800
   store <16 x bfloat> %2361, ptr %2362, align 32, !tbaa !2
   %2363 = bitcast <8 x i32> %2323 to <16 x i16>
-  %2364 = getelementptr %class.bfloat16, ptr %0, i20 864
+  %2364 = getelementptr bfloat, ptr %0, i20 864
   %2365 = load <16 x bfloat>, ptr %2364, align 32, !tbaa !2
   %2366 = tail call noundef <16 x i32> @llvm.aie2.v16bf16.to.v16i32(<16 x bfloat> %2320, i32 8)
   %2367 = tail call <16 x i32> @llvm.aie2.vshuffle(<16 x i32> %2366, <16 x i32> %14, i32 2)
@@ -2467,10 +2465,10 @@ define dso_local void @_Z3dutP8bfloat16S0_(ptr noalias nocapture readonly %0, pt
   %2404 = tail call <32 x bfloat> @llvm.aie2.upd.bf512.bf256(<32 x bfloat> %2403, <16 x bfloat> %106, i32 1)
   %2405 = tail call noundef <8 x i64> @llvm.aie2.bf.mul16.conf(<32 x bfloat> %2402, <32 x bfloat> %2404, i32 60)
   %2406 = tail call noundef <16 x bfloat> @llvm.aie2.v16accfloat.to.v16bf16(<8 x i64> %2405)
-  %2407 = getelementptr inbounds %class.bfloat16, ptr %1, i20 816
+  %2407 = getelementptr inbounds bfloat, ptr %1, i20 816
   store <16 x bfloat> %2406, ptr %2407, align 32, !tbaa !2
   %2408 = bitcast <8 x i32> %2368 to <16 x i16>
-  %2409 = getelementptr %class.bfloat16, ptr %0, i20 880
+  %2409 = getelementptr bfloat, ptr %0, i20 880
   %2410 = load <16 x bfloat>, ptr %2409, align 32, !tbaa !2
   %2411 = tail call noundef <16 x i32> @llvm.aie2.v16bf16.to.v16i32(<16 x bfloat> %2365, i32 8)
   %2412 = tail call <16 x i32> @llvm.aie2.vshuffle(<16 x i32> %2411, <16 x i32> %14, i32 2)
@@ -2513,10 +2511,10 @@ define dso_local void @_Z3dutP8bfloat16S0_(ptr noalias nocapture readonly %0, pt
   %2449 = tail call <32 x bfloat> @llvm.aie2.upd.bf512.bf256(<32 x bfloat> %2448, <16 x bfloat> %106, i32 1)
   %2450 = tail call noundef <8 x i64> @llvm.aie2.bf.mul16.conf(<32 x bfloat> %2447, <32 x bfloat> %2449, i32 60)
   %2451 = tail call noundef <16 x bfloat> @llvm.aie2.v16accfloat.to.v16bf16(<8 x i64> %2450)
-  %2452 = getelementptr inbounds %class.bfloat16, ptr %1, i20 832
+  %2452 = getelementptr inbounds bfloat, ptr %1, i20 832
   store <16 x bfloat> %2451, ptr %2452, align 32, !tbaa !2
   %2453 = bitcast <8 x i32> %2413 to <16 x i16>
-  %2454 = getelementptr %class.bfloat16, ptr %0, i20 896
+  %2454 = getelementptr bfloat, ptr %0, i20 896
   %2455 = load <16 x bfloat>, ptr %2454, align 32, !tbaa !2
   %2456 = tail call noundef <16 x i32> @llvm.aie2.v16bf16.to.v16i32(<16 x bfloat> %2410, i32 8)
   %2457 = tail call <16 x i32> @llvm.aie2.vshuffle(<16 x i32> %2456, <16 x i32> %14, i32 2)
@@ -2559,10 +2557,10 @@ define dso_local void @_Z3dutP8bfloat16S0_(ptr noalias nocapture readonly %0, pt
   %2494 = tail call <32 x bfloat> @llvm.aie2.upd.bf512.bf256(<32 x bfloat> %2493, <16 x bfloat> %106, i32 1)
   %2495 = tail call noundef <8 x i64> @llvm.aie2.bf.mul16.conf(<32 x bfloat> %2492, <32 x bfloat> %2494, i32 60)
   %2496 = tail call noundef <16 x bfloat> @llvm.aie2.v16accfloat.to.v16bf16(<8 x i64> %2495)
-  %2497 = getelementptr inbounds %class.bfloat16, ptr %1, i20 848
+  %2497 = getelementptr inbounds bfloat, ptr %1, i20 848
   store <16 x bfloat> %2496, ptr %2497, align 32, !tbaa !2
   %2498 = bitcast <8 x i32> %2458 to <16 x i16>
-  %2499 = getelementptr %class.bfloat16, ptr %0, i20 912
+  %2499 = getelementptr bfloat, ptr %0, i20 912
   %2500 = load <16 x bfloat>, ptr %2499, align 32, !tbaa !2
   %2501 = tail call noundef <16 x i32> @llvm.aie2.v16bf16.to.v16i32(<16 x bfloat> %2455, i32 8)
   %2502 = tail call <16 x i32> @llvm.aie2.vshuffle(<16 x i32> %2501, <16 x i32> %14, i32 2)
@@ -2605,10 +2603,10 @@ define dso_local void @_Z3dutP8bfloat16S0_(ptr noalias nocapture readonly %0, pt
   %2539 = tail call <32 x bfloat> @llvm.aie2.upd.bf512.bf256(<32 x bfloat> %2538, <16 x bfloat> %106, i32 1)
   %2540 = tail call noundef <8 x i64> @llvm.aie2.bf.mul16.conf(<32 x bfloat> %2537, <32 x bfloat> %2539, i32 60)
   %2541 = tail call noundef <16 x bfloat> @llvm.aie2.v16accfloat.to.v16bf16(<8 x i64> %2540)
-  %2542 = getelementptr inbounds %class.bfloat16, ptr %1, i20 864
+  %2542 = getelementptr inbounds bfloat, ptr %1, i20 864
   store <16 x bfloat> %2541, ptr %2542, align 32, !tbaa !2
   %2543 = bitcast <8 x i32> %2503 to <16 x i16>
-  %2544 = getelementptr %class.bfloat16, ptr %0, i20 928
+  %2544 = getelementptr bfloat, ptr %0, i20 928
   %2545 = load <16 x bfloat>, ptr %2544, align 32, !tbaa !2
   %2546 = tail call noundef <16 x i32> @llvm.aie2.v16bf16.to.v16i32(<16 x bfloat> %2500, i32 8)
   %2547 = tail call <16 x i32> @llvm.aie2.vshuffle(<16 x i32> %2546, <16 x i32> %14, i32 2)
@@ -2651,10 +2649,10 @@ define dso_local void @_Z3dutP8bfloat16S0_(ptr noalias nocapture readonly %0, pt
   %2584 = tail call <32 x bfloat> @llvm.aie2.upd.bf512.bf256(<32 x bfloat> %2583, <16 x bfloat> %106, i32 1)
   %2585 = tail call noundef <8 x i64> @llvm.aie2.bf.mul16.conf(<32 x bfloat> %2582, <32 x bfloat> %2584, i32 60)
   %2586 = tail call noundef <16 x bfloat> @llvm.aie2.v16accfloat.to.v16bf16(<8 x i64> %2585)
-  %2587 = getelementptr inbounds %class.bfloat16, ptr %1, i20 880
+  %2587 = getelementptr inbounds bfloat, ptr %1, i20 880
   store <16 x bfloat> %2586, ptr %2587, align 32, !tbaa !2
   %2588 = bitcast <8 x i32> %2548 to <16 x i16>
-  %2589 = getelementptr %class.bfloat16, ptr %0, i20 944
+  %2589 = getelementptr bfloat, ptr %0, i20 944
   %2590 = load <16 x bfloat>, ptr %2589, align 32, !tbaa !2
   %2591 = tail call noundef <16 x i32> @llvm.aie2.v16bf16.to.v16i32(<16 x bfloat> %2545, i32 8)
   %2592 = tail call <16 x i32> @llvm.aie2.vshuffle(<16 x i32> %2591, <16 x i32> %14, i32 2)
@@ -2697,10 +2695,10 @@ define dso_local void @_Z3dutP8bfloat16S0_(ptr noalias nocapture readonly %0, pt
   %2629 = tail call <32 x bfloat> @llvm.aie2.upd.bf512.bf256(<32 x bfloat> %2628, <16 x bfloat> %106, i32 1)
   %2630 = tail call noundef <8 x i64> @llvm.aie2.bf.mul16.conf(<32 x bfloat> %2627, <32 x bfloat> %2629, i32 60)
   %2631 = tail call noundef <16 x bfloat> @llvm.aie2.v16accfloat.to.v16bf16(<8 x i64> %2630)
-  %2632 = getelementptr inbounds %class.bfloat16, ptr %1, i20 896
+  %2632 = getelementptr inbounds bfloat, ptr %1, i20 896
   store <16 x bfloat> %2631, ptr %2632, align 32, !tbaa !2
   %2633 = bitcast <8 x i32> %2593 to <16 x i16>
-  %2634 = getelementptr %class.bfloat16, ptr %0, i20 960
+  %2634 = getelementptr bfloat, ptr %0, i20 960
   %2635 = load <16 x bfloat>, ptr %2634, align 32, !tbaa !2
   %2636 = tail call noundef <16 x i32> @llvm.aie2.v16bf16.to.v16i32(<16 x bfloat> %2590, i32 8)
   %2637 = tail call <16 x i32> @llvm.aie2.vshuffle(<16 x i32> %2636, <16 x i32> %14, i32 2)
@@ -2743,10 +2741,10 @@ define dso_local void @_Z3dutP8bfloat16S0_(ptr noalias nocapture readonly %0, pt
   %2674 = tail call <32 x bfloat> @llvm.aie2.upd.bf512.bf256(<32 x bfloat> %2673, <16 x bfloat> %106, i32 1)
   %2675 = tail call noundef <8 x i64> @llvm.aie2.bf.mul16.conf(<32 x bfloat> %2672, <32 x bfloat> %2674, i32 60)
   %2676 = tail call noundef <16 x bfloat> @llvm.aie2.v16accfloat.to.v16bf16(<8 x i64> %2675)
-  %2677 = getelementptr inbounds %class.bfloat16, ptr %1, i20 912
+  %2677 = getelementptr inbounds bfloat, ptr %1, i20 912
   store <16 x bfloat> %2676, ptr %2677, align 32, !tbaa !2
   %2678 = bitcast <8 x i32> %2638 to <16 x i16>
-  %2679 = getelementptr %class.bfloat16, ptr %0, i20 976
+  %2679 = getelementptr bfloat, ptr %0, i20 976
   %2680 = load <16 x bfloat>, ptr %2679, align 32, !tbaa !2
   %2681 = tail call noundef <16 x i32> @llvm.aie2.v16bf16.to.v16i32(<16 x bfloat> %2635, i32 8)
   %2682 = tail call <16 x i32> @llvm.aie2.vshuffle(<16 x i32> %2681, <16 x i32> %14, i32 2)
@@ -2789,10 +2787,10 @@ define dso_local void @_Z3dutP8bfloat16S0_(ptr noalias nocapture readonly %0, pt
   %2719 = tail call <32 x bfloat> @llvm.aie2.upd.bf512.bf256(<32 x bfloat> %2718, <16 x bfloat> %106, i32 1)
   %2720 = tail call noundef <8 x i64> @llvm.aie2.bf.mul16.conf(<32 x bfloat> %2717, <32 x bfloat> %2719, i32 60)
   %2721 = tail call noundef <16 x bfloat> @llvm.aie2.v16accfloat.to.v16bf16(<8 x i64> %2720)
-  %2722 = getelementptr inbounds %class.bfloat16, ptr %1, i20 928
+  %2722 = getelementptr inbounds bfloat, ptr %1, i20 928
   store <16 x bfloat> %2721, ptr %2722, align 32, !tbaa !2
   %2723 = bitcast <8 x i32> %2683 to <16 x i16>
-  %2724 = getelementptr %class.bfloat16, ptr %0, i20 992
+  %2724 = getelementptr bfloat, ptr %0, i20 992
   %2725 = load <16 x bfloat>, ptr %2724, align 32, !tbaa !2
   %2726 = tail call noundef <16 x i32> @llvm.aie2.v16bf16.to.v16i32(<16 x bfloat> %2680, i32 8)
   %2727 = tail call <16 x i32> @llvm.aie2.vshuffle(<16 x i32> %2726, <16 x i32> %14, i32 2)
@@ -2835,10 +2833,10 @@ define dso_local void @_Z3dutP8bfloat16S0_(ptr noalias nocapture readonly %0, pt
   %2764 = tail call <32 x bfloat> @llvm.aie2.upd.bf512.bf256(<32 x bfloat> %2763, <16 x bfloat> %106, i32 1)
   %2765 = tail call noundef <8 x i64> @llvm.aie2.bf.mul16.conf(<32 x bfloat> %2762, <32 x bfloat> %2764, i32 60)
   %2766 = tail call noundef <16 x bfloat> @llvm.aie2.v16accfloat.to.v16bf16(<8 x i64> %2765)
-  %2767 = getelementptr inbounds %class.bfloat16, ptr %1, i20 944
+  %2767 = getelementptr inbounds bfloat, ptr %1, i20 944
   store <16 x bfloat> %2766, ptr %2767, align 32, !tbaa !2
   %2768 = bitcast <8 x i32> %2728 to <16 x i16>
-  %2769 = getelementptr %class.bfloat16, ptr %0, i20 1008
+  %2769 = getelementptr bfloat, ptr %0, i20 1008
   %2770 = load <16 x bfloat>, ptr %2769, align 32, !tbaa !2
   %2771 = tail call noundef <16 x i32> @llvm.aie2.v16bf16.to.v16i32(<16 x bfloat> %2725, i32 8)
   %2772 = tail call <16 x i32> @llvm.aie2.vshuffle(<16 x i32> %2771, <16 x i32> %14, i32 2)
@@ -2881,7 +2879,7 @@ define dso_local void @_Z3dutP8bfloat16S0_(ptr noalias nocapture readonly %0, pt
   %2809 = tail call <32 x bfloat> @llvm.aie2.upd.bf512.bf256(<32 x bfloat> %2808, <16 x bfloat> %106, i32 1)
   %2810 = tail call noundef <8 x i64> @llvm.aie2.bf.mul16.conf(<32 x bfloat> %2807, <32 x bfloat> %2809, i32 60)
   %2811 = tail call noundef <16 x bfloat> @llvm.aie2.v16accfloat.to.v16bf16(<8 x i64> %2810)
-  %2812 = getelementptr inbounds %class.bfloat16, ptr %1, i20 960
+  %2812 = getelementptr inbounds bfloat, ptr %1, i20 960
   store <16 x bfloat> %2811, ptr %2812, align 32, !tbaa !2
   %2813 = bitcast <8 x i32> %2773 to <16 x i16>
   %2814 = tail call noundef <16 x i32> @llvm.aie2.v16bf16.to.v16i32(<16 x bfloat> %2770, i32 8)
@@ -2925,7 +2923,7 @@ define dso_local void @_Z3dutP8bfloat16S0_(ptr noalias nocapture readonly %0, pt
   %2852 = tail call <32 x bfloat> @llvm.aie2.upd.bf512.bf256(<32 x bfloat> %2851, <16 x bfloat> %106, i32 1)
   %2853 = tail call noundef <8 x i64> @llvm.aie2.bf.mul16.conf(<32 x bfloat> %2850, <32 x bfloat> %2852, i32 60)
   %2854 = tail call noundef <16 x bfloat> @llvm.aie2.v16accfloat.to.v16bf16(<8 x i64> %2853)
-  %2855 = getelementptr inbounds %class.bfloat16, ptr %1, i20 976
+  %2855 = getelementptr inbounds bfloat, ptr %1, i20 976
   store <16 x bfloat> %2854, ptr %2855, align 32, !tbaa !2
   %2856 = bitcast <8 x i32> %2816 to <16 x i16>
   %2857 = tail call noundef <16 x i64> @llvm.aie2.acc64.v16.I256.ups(<16 x i16> %2856, i32 0, i32 0)
@@ -2966,7 +2964,7 @@ define dso_local void @_Z3dutP8bfloat16S0_(ptr noalias nocapture readonly %0, pt
   %2892 = tail call <32 x bfloat> @llvm.aie2.upd.bf512.bf256(<32 x bfloat> %2891, <16 x bfloat> %106, i32 1)
   %2893 = tail call noundef <8 x i64> @llvm.aie2.bf.mul16.conf(<32 x bfloat> %2890, <32 x bfloat> %2892, i32 60)
   %2894 = tail call noundef <16 x bfloat> @llvm.aie2.v16accfloat.to.v16bf16(<8 x i64> %2893)
-  %2895 = getelementptr inbounds %class.bfloat16, ptr %1, i20 992
+  %2895 = getelementptr inbounds bfloat, ptr %1, i20 992
   store <16 x bfloat> %2894, ptr %2895, align 32, !tbaa !2
   %2896 = tail call <32 x bfloat> @llvm.aie2.set.bf512.bf256(<16 x bfloat> %2872, i32 0)
   %2897 = tail call <32 x bfloat> @llvm.aie2.upd.bf512.bf256(<32 x bfloat> %2896, <16 x bfloat> %106, i32 1)
@@ -2974,7 +2972,7 @@ define dso_local void @_Z3dutP8bfloat16S0_(ptr noalias nocapture readonly %0, pt
   %2899 = tail call <32 x bfloat> @llvm.aie2.upd.bf512.bf256(<32 x bfloat> %2898, <16 x bfloat> %106, i32 1)
   %2900 = tail call noundef <8 x i64> @llvm.aie2.bf.mul16.conf(<32 x bfloat> %2897, <32 x bfloat> %2899, i32 60)
   %2901 = tail call noundef <16 x bfloat> @llvm.aie2.v16accfloat.to.v16bf16(<8 x i64> %2900)
-  %2902 = getelementptr inbounds %class.bfloat16, ptr %1, i20 1008
+  %2902 = getelementptr inbounds bfloat, ptr %1, i20 1008
   store <16 x bfloat> %2901, ptr %2902, align 32, !tbaa !2
   ret void
 }
@@ -3064,42 +3062,42 @@ attributes #4 = { mustprogress nocallback nofree nosync nounwind willreturn memo
 !3 = !{!"omnipotent char", !4, i64 0}
 !4 = !{!"Simple C++ TBAA"}
 !5 = !{!6, !8}
-!6 = distinct !{!6, !7, !"_ZN3aie6detail15parallel_lookupItNS0_3lutILj4E8bfloat16S3_EELNS0_14lut_oor_policyE1EE5fetchINS_6vectorItLj16EEELj16EQaaaaleclsrTL0__4sizeELi32EleTL0_0_clsrSA_4sizeEleTL0_0_sr20native_vector_lengthIT0_EE5valueEENS8_IS3_XT0_EEERKT_: argument 0"}
-!7 = distinct !{!7, !"_ZN3aie6detail15parallel_lookupItNS0_3lutILj4E8bfloat16S3_EELNS0_14lut_oor_policyE1EE5fetchINS_6vectorItLj16EEELj16EQaaaaleclsrTL0__4sizeELi32EleTL0_0_clsrSA_4sizeEleTL0_0_sr20native_vector_lengthIT0_EE5valueEENS8_IS3_XT0_EEERKT_"}
-!8 = distinct !{!8, !9, !"_ZN3aie15parallel_lookupItNS_3lutILj4E8bfloat16S2_EELNS_6detail14lut_oor_policyE1EE5fetchITkNS_6VectorENS_6vectorItLj16EEELj16EEENS8_IS2_XT0_EEERKT_: argument 0"}
-!9 = distinct !{!9, !"_ZN3aie15parallel_lookupItNS_3lutILj4E8bfloat16S2_EELNS_6detail14lut_oor_policyE1EE5fetchITkNS_6VectorENS_6vectorItLj16EEELj16EEENS8_IS2_XT0_EEERKT_"}
+!6 = distinct !{!6, !7, !"_ZN3aie6detail15parallel_lookupItNS0_3lutILj4Eu6__bf16u6__bf16EELNS0_14lut_oor_policyE1EE5fetchINS_6vectorItLj16EEELj16EQaaaaleclsrTL0__4sizeELi32EleTL0_0_clsrS9_4sizeEleTL0_0_sr20native_vector_lengthIT0_EE5valueEENS7_Iu6__bf16XT0_EEERKT_: argument 0"}
+!7 = distinct !{!7, !"_ZN3aie6detail15parallel_lookupItNS0_3lutILj4Eu6__bf16u6__bf16EELNS0_14lut_oor_policyE1EE5fetchINS_6vectorItLj16EEELj16EQaaaaleclsrTL0__4sizeELi32EleTL0_0_clsrS9_4sizeEleTL0_0_sr20native_vector_lengthIT0_EE5valueEENS7_Iu6__bf16XT0_EEERKT_"}
+!8 = distinct !{!8, !9, !"_ZN3aie15parallel_lookupItNS_3lutILj4Eu6__bf16u6__bf16EELNS_6detail14lut_oor_policyE1EE5fetchITkNS_6VectorENS_6vectorItLj16EEELj16EEENS7_Iu6__bf16XT0_EEERKT_: argument 0"}
+!9 = distinct !{!9, !"_ZN3aie15parallel_lookupItNS_3lutILj4Eu6__bf16u6__bf16EELNS_6detail14lut_oor_policyE1EE5fetchITkNS_6VectorENS_6vectorItLj16EEELj16EEENS7_Iu6__bf16XT0_EEERKT_"}
 !10 = !{!11, !13}
-!11 = distinct !{!11, !12, !"_ZN3aie6detail15parallel_lookupItNS0_3lutILj4E8bfloat16S3_EELNS0_14lut_oor_policyE1EE5fetchINS_6vectorItLj16EEELj16EQaaaaleclsrTL0__4sizeELi32EleTL0_0_clsrSA_4sizeEleTL0_0_sr20native_vector_lengthIT0_EE5valueEENS8_IS3_XT0_EEERKT_: argument 0"}
-!12 = distinct !{!12, !"_ZN3aie6detail15parallel_lookupItNS0_3lutILj4E8bfloat16S3_EELNS0_14lut_oor_policyE1EE5fetchINS_6vectorItLj16EEELj16EQaaaaleclsrTL0__4sizeELi32EleTL0_0_clsrSA_4sizeEleTL0_0_sr20native_vector_lengthIT0_EE5valueEENS8_IS3_XT0_EEERKT_"}
-!13 = distinct !{!13, !14, !"_ZN3aie15parallel_lookupItNS_3lutILj4E8bfloat16S2_EELNS_6detail14lut_oor_policyE1EE5fetchITkNS_6VectorENS_6vectorItLj16EEELj16EEENS8_IS2_XT0_EEERKT_: argument 0"}
-!14 = distinct !{!14, !"_ZN3aie15parallel_lookupItNS_3lutILj4E8bfloat16S2_EELNS_6detail14lut_oor_policyE1EE5fetchITkNS_6VectorENS_6vectorItLj16EEELj16EEENS8_IS2_XT0_EEERKT_"}
+!11 = distinct !{!11, !12, !"_ZN3aie6detail15parallel_lookupItNS0_3lutILj4Eu6__bf16u6__bf16EELNS0_14lut_oor_policyE1EE5fetchINS_6vectorItLj16EEELj16EQaaaaleclsrTL0__4sizeELi32EleTL0_0_clsrS9_4sizeEleTL0_0_sr20native_vector_lengthIT0_EE5valueEENS7_Iu6__bf16XT0_EEERKT_: argument 0"}
+!12 = distinct !{!12, !"_ZN3aie6detail15parallel_lookupItNS0_3lutILj4Eu6__bf16u6__bf16EELNS0_14lut_oor_policyE1EE5fetchINS_6vectorItLj16EEELj16EQaaaaleclsrTL0__4sizeELi32EleTL0_0_clsrS9_4sizeEleTL0_0_sr20native_vector_lengthIT0_EE5valueEENS7_Iu6__bf16XT0_EEERKT_"}
+!13 = distinct !{!13, !14, !"_ZN3aie15parallel_lookupItNS_3lutILj4Eu6__bf16u6__bf16EELNS_6detail14lut_oor_policyE1EE5fetchITkNS_6VectorENS_6vectorItLj16EEELj16EEENS7_Iu6__bf16XT0_EEERKT_: argument 0"}
+!14 = distinct !{!14, !"_ZN3aie15parallel_lookupItNS_3lutILj4Eu6__bf16u6__bf16EELNS_6detail14lut_oor_policyE1EE5fetchITkNS_6VectorENS_6vectorItLj16EEELj16EEENS7_Iu6__bf16XT0_EEERKT_"}
 !15 = !{!16, !18}
-!16 = distinct !{!16, !17, !"_ZN3aie6detail15parallel_lookupItNS0_3lutILj4E8bfloat16S3_EELNS0_14lut_oor_policyE1EE5fetchINS_6vectorItLj16EEELj16EQaaaaleclsrTL0__4sizeELi32EleTL0_0_clsrSA_4sizeEleTL0_0_sr20native_vector_lengthIT0_EE5valueEENS8_IS3_XT0_EEERKT_: argument 0"}
-!17 = distinct !{!17, !"_ZN3aie6detail15parallel_lookupItNS0_3lutILj4E8bfloat16S3_EELNS0_14lut_oor_policyE1EE5fetchINS_6vectorItLj16EEELj16EQaaaaleclsrTL0__4sizeELi32EleTL0_0_clsrSA_4sizeEleTL0_0_sr20native_vector_lengthIT0_EE5valueEENS8_IS3_XT0_EEERKT_"}
-!18 = distinct !{!18, !19, !"_ZN3aie15parallel_lookupItNS_3lutILj4E8bfloat16S2_EELNS_6detail14lut_oor_policyE1EE5fetchITkNS_6VectorENS_6vectorItLj16EEELj16EEENS8_IS2_XT0_EEERKT_: argument 0"}
-!19 = distinct !{!19, !"_ZN3aie15parallel_lookupItNS_3lutILj4E8bfloat16S2_EELNS_6detail14lut_oor_policyE1EE5fetchITkNS_6VectorENS_6vectorItLj16EEELj16EEENS8_IS2_XT0_EEERKT_"}
+!16 = distinct !{!16, !17, !"_ZN3aie6detail15parallel_lookupItNS0_3lutILj4Eu6__bf16u6__bf16EELNS0_14lut_oor_policyE1EE5fetchINS_6vectorItLj16EEELj16EQaaaaleclsrTL0__4sizeELi32EleTL0_0_clsrS9_4sizeEleTL0_0_sr20native_vector_lengthIT0_EE5valueEENS7_Iu6__bf16XT0_EEERKT_: argument 0"}
+!17 = distinct !{!17, !"_ZN3aie6detail15parallel_lookupItNS0_3lutILj4Eu6__bf16u6__bf16EELNS0_14lut_oor_policyE1EE5fetchINS_6vectorItLj16EEELj16EQaaaaleclsrTL0__4sizeELi32EleTL0_0_clsrS9_4sizeEleTL0_0_sr20native_vector_lengthIT0_EE5valueEENS7_Iu6__bf16XT0_EEERKT_"}
+!18 = distinct !{!18, !19, !"_ZN3aie15parallel_lookupItNS_3lutILj4Eu6__bf16u6__bf16EELNS_6detail14lut_oor_policyE1EE5fetchITkNS_6VectorENS_6vectorItLj16EEELj16EEENS7_Iu6__bf16XT0_EEERKT_: argument 0"}
+!19 = distinct !{!19, !"_ZN3aie15parallel_lookupItNS_3lutILj4Eu6__bf16u6__bf16EELNS_6detail14lut_oor_policyE1EE5fetchITkNS_6VectorENS_6vectorItLj16EEELj16EEENS7_Iu6__bf16XT0_EEERKT_"}
 !20 = !{!21, !23}
-!21 = distinct !{!21, !22, !"_ZN3aie6detail15parallel_lookupItNS0_3lutILj4E8bfloat16S3_EELNS0_14lut_oor_policyE1EE5fetchINS_6vectorItLj16EEELj16EQaaaaleclsrTL0__4sizeELi32EleTL0_0_clsrSA_4sizeEleTL0_0_sr20native_vector_lengthIT0_EE5valueEENS8_IS3_XT0_EEERKT_: argument 0"}
-!22 = distinct !{!22, !"_ZN3aie6detail15parallel_lookupItNS0_3lutILj4E8bfloat16S3_EELNS0_14lut_oor_policyE1EE5fetchINS_6vectorItLj16EEELj16EQaaaaleclsrTL0__4sizeELi32EleTL0_0_clsrSA_4sizeEleTL0_0_sr20native_vector_lengthIT0_EE5valueEENS8_IS3_XT0_EEERKT_"}
-!23 = distinct !{!23, !24, !"_ZN3aie15parallel_lookupItNS_3lutILj4E8bfloat16S2_EELNS_6detail14lut_oor_policyE1EE5fetchITkNS_6VectorENS_6vectorItLj16EEELj16EEENS8_IS2_XT0_EEERKT_: argument 0"}
-!24 = distinct !{!24, !"_ZN3aie15parallel_lookupItNS_3lutILj4E8bfloat16S2_EELNS_6detail14lut_oor_policyE1EE5fetchITkNS_6VectorENS_6vectorItLj16EEELj16EEENS8_IS2_XT0_EEERKT_"}
+!21 = distinct !{!21, !22, !"_ZN3aie6detail15parallel_lookupItNS0_3lutILj4Eu6__bf16u6__bf16EELNS0_14lut_oor_policyE1EE5fetchINS_6vectorItLj16EEELj16EQaaaaleclsrTL0__4sizeELi32EleTL0_0_clsrS9_4sizeEleTL0_0_sr20native_vector_lengthIT0_EE5valueEENS7_Iu6__bf16XT0_EEERKT_: argument 0"}
+!22 = distinct !{!22, !"_ZN3aie6detail15parallel_lookupItNS0_3lutILj4Eu6__bf16u6__bf16EELNS0_14lut_oor_policyE1EE5fetchINS_6vectorItLj16EEELj16EQaaaaleclsrTL0__4sizeELi32EleTL0_0_clsrS9_4sizeEleTL0_0_sr20native_vector_lengthIT0_EE5valueEENS7_Iu6__bf16XT0_EEERKT_"}
+!23 = distinct !{!23, !24, !"_ZN3aie15parallel_lookupItNS_3lutILj4Eu6__bf16u6__bf16EELNS_6detail14lut_oor_policyE1EE5fetchITkNS_6VectorENS_6vectorItLj16EEELj16EEENS7_Iu6__bf16XT0_EEERKT_: argument 0"}
+!24 = distinct !{!24, !"_ZN3aie15parallel_lookupItNS_3lutILj4Eu6__bf16u6__bf16EELNS_6detail14lut_oor_policyE1EE5fetchITkNS_6VectorENS_6vectorItLj16EEELj16EEENS7_Iu6__bf16XT0_EEERKT_"}
 !25 = !{!26, !28}
-!26 = distinct !{!26, !27, !"_ZN3aie6detail15parallel_lookupItNS0_3lutILj4E8bfloat16S3_EELNS0_14lut_oor_policyE1EE5fetchINS_6vectorItLj16EEELj16EQaaaaleclsrTL0__4sizeELi32EleTL0_0_clsrSA_4sizeEleTL0_0_sr20native_vector_lengthIT0_EE5valueEENS8_IS3_XT0_EEERKT_: argument 0"}
-!27 = distinct !{!27, !"_ZN3aie6detail15parallel_lookupItNS0_3lutILj4E8bfloat16S3_EELNS0_14lut_oor_policyE1EE5fetchINS_6vectorItLj16EEELj16EQaaaaleclsrTL0__4sizeELi32EleTL0_0_clsrSA_4sizeEleTL0_0_sr20native_vector_lengthIT0_EE5valueEENS8_IS3_XT0_EEERKT_"}
-!28 = distinct !{!28, !29, !"_ZN3aie15parallel_lookupItNS_3lutILj4E8bfloat16S2_EELNS_6detail14lut_oor_policyE1EE5fetchITkNS_6VectorENS_6vectorItLj16EEELj16EEENS8_IS2_XT0_EEERKT_: argument 0"}
-!29 = distinct !{!29, !"_ZN3aie15parallel_lookupItNS_3lutILj4E8bfloat16S2_EELNS_6detail14lut_oor_policyE1EE5fetchITkNS_6VectorENS_6vectorItLj16EEELj16EEENS8_IS2_XT0_EEERKT_"}
+!26 = distinct !{!26, !27, !"_ZN3aie6detail15parallel_lookupItNS0_3lutILj4Eu6__bf16u6__bf16EELNS0_14lut_oor_policyE1EE5fetchINS_6vectorItLj16EEELj16EQaaaaleclsrTL0__4sizeELi32EleTL0_0_clsrS9_4sizeEleTL0_0_sr20native_vector_lengthIT0_EE5valueEENS7_Iu6__bf16XT0_EEERKT_: argument 0"}
+!27 = distinct !{!27, !"_ZN3aie6detail15parallel_lookupItNS0_3lutILj4Eu6__bf16u6__bf16EELNS0_14lut_oor_policyE1EE5fetchINS_6vectorItLj16EEELj16EQaaaaleclsrTL0__4sizeELi32EleTL0_0_clsrS9_4sizeEleTL0_0_sr20native_vector_lengthIT0_EE5valueEENS7_Iu6__bf16XT0_EEERKT_"}
+!28 = distinct !{!28, !29, !"_ZN3aie15parallel_lookupItNS_3lutILj4Eu6__bf16u6__bf16EELNS_6detail14lut_oor_policyE1EE5fetchITkNS_6VectorENS_6vectorItLj16EEELj16EEENS7_Iu6__bf16XT0_EEERKT_: argument 0"}
+!29 = distinct !{!29, !"_ZN3aie15parallel_lookupItNS_3lutILj4Eu6__bf16u6__bf16EELNS_6detail14lut_oor_policyE1EE5fetchITkNS_6VectorENS_6vectorItLj16EEELj16EEENS7_Iu6__bf16XT0_EEERKT_"}
 !30 = !{!31, !33}
-!31 = distinct !{!31, !32, !"_ZN3aie6detail15parallel_lookupItNS0_3lutILj4E8bfloat16S3_EELNS0_14lut_oor_policyE1EE5fetchINS_6vectorItLj16EEELj16EQaaaaleclsrTL0__4sizeELi32EleTL0_0_clsrSA_4sizeEleTL0_0_sr20native_vector_lengthIT0_EE5valueEENS8_IS3_XT0_EEERKT_: argument 0"}
-!32 = distinct !{!32, !"_ZN3aie6detail15parallel_lookupItNS0_3lutILj4E8bfloat16S3_EELNS0_14lut_oor_policyE1EE5fetchINS_6vectorItLj16EEELj16EQaaaaleclsrTL0__4sizeELi32EleTL0_0_clsrSA_4sizeEleTL0_0_sr20native_vector_lengthIT0_EE5valueEENS8_IS3_XT0_EEERKT_"}
-!33 = distinct !{!33, !34, !"_ZN3aie15parallel_lookupItNS_3lutILj4E8bfloat16S2_EELNS_6detail14lut_oor_policyE1EE5fetchITkNS_6VectorENS_6vectorItLj16EEELj16EEENS8_IS2_XT0_EEERKT_: argument 0"}
-!34 = distinct !{!34, !"_ZN3aie15parallel_lookupItNS_3lutILj4E8bfloat16S2_EELNS_6detail14lut_oor_policyE1EE5fetchITkNS_6VectorENS_6vectorItLj16EEELj16EEENS8_IS2_XT0_EEERKT_"}
+!31 = distinct !{!31, !32, !"_ZN3aie6detail15parallel_lookupItNS0_3lutILj4Eu6__bf16u6__bf16EELNS0_14lut_oor_policyE1EE5fetchINS_6vectorItLj16EEELj16EQaaaaleclsrTL0__4sizeELi32EleTL0_0_clsrS9_4sizeEleTL0_0_sr20native_vector_lengthIT0_EE5valueEENS7_Iu6__bf16XT0_EEERKT_: argument 0"}
+!32 = distinct !{!32, !"_ZN3aie6detail15parallel_lookupItNS0_3lutILj4Eu6__bf16u6__bf16EELNS0_14lut_oor_policyE1EE5fetchINS_6vectorItLj16EEELj16EQaaaaleclsrTL0__4sizeELi32EleTL0_0_clsrS9_4sizeEleTL0_0_sr20native_vector_lengthIT0_EE5valueEENS7_Iu6__bf16XT0_EEERKT_"}
+!33 = distinct !{!33, !34, !"_ZN3aie15parallel_lookupItNS_3lutILj4Eu6__bf16u6__bf16EELNS_6detail14lut_oor_policyE1EE5fetchITkNS_6VectorENS_6vectorItLj16EEELj16EEENS7_Iu6__bf16XT0_EEERKT_: argument 0"}
+!34 = distinct !{!34, !"_ZN3aie15parallel_lookupItNS_3lutILj4Eu6__bf16u6__bf16EELNS_6detail14lut_oor_policyE1EE5fetchITkNS_6VectorENS_6vectorItLj16EEELj16EEENS7_Iu6__bf16XT0_EEERKT_"}
 !35 = !{!36, !38}
-!36 = distinct !{!36, !37, !"_ZN3aie6detail15parallel_lookupItNS0_3lutILj4E8bfloat16S3_EELNS0_14lut_oor_policyE1EE5fetchINS_6vectorItLj16EEELj16EQaaaaleclsrTL0__4sizeELi32EleTL0_0_clsrSA_4sizeEleTL0_0_sr20native_vector_lengthIT0_EE5valueEENS8_IS3_XT0_EEERKT_: argument 0"}
-!37 = distinct !{!37, !"_ZN3aie6detail15parallel_lookupItNS0_3lutILj4E8bfloat16S3_EELNS0_14lut_oor_policyE1EE5fetchINS_6vectorItLj16EEELj16EQaaaaleclsrTL0__4sizeELi32EleTL0_0_clsrSA_4sizeEleTL0_0_sr20native_vector_lengthIT0_EE5valueEENS8_IS3_XT0_EEERKT_"}
-!38 = distinct !{!38, !39, !"_ZN3aie15parallel_lookupItNS_3lutILj4E8bfloat16S2_EELNS_6detail14lut_oor_policyE1EE5fetchITkNS_6VectorENS_6vectorItLj16EEELj16EEENS8_IS2_XT0_EEERKT_: argument 0"}
-!39 = distinct !{!39, !"_ZN3aie15parallel_lookupItNS_3lutILj4E8bfloat16S2_EELNS_6detail14lut_oor_policyE1EE5fetchITkNS_6VectorENS_6vectorItLj16EEELj16EEENS8_IS2_XT0_EEERKT_"}
+!36 = distinct !{!36, !37, !"_ZN3aie6detail15parallel_lookupItNS0_3lutILj4Eu6__bf16u6__bf16EELNS0_14lut_oor_policyE1EE5fetchINS_6vectorItLj16EEELj16EQaaaaleclsrTL0__4sizeELi32EleTL0_0_clsrS9_4sizeEleTL0_0_sr20native_vector_lengthIT0_EE5valueEENS7_Iu6__bf16XT0_EEERKT_: argument 0"}
+!37 = distinct !{!37, !"_ZN3aie6detail15parallel_lookupItNS0_3lutILj4Eu6__bf16u6__bf16EELNS0_14lut_oor_policyE1EE5fetchINS_6vectorItLj16EEELj16EQaaaaleclsrTL0__4sizeELi32EleTL0_0_clsrS9_4sizeEleTL0_0_sr20native_vector_lengthIT0_EE5valueEENS7_Iu6__bf16XT0_EEERKT_"}
+!38 = distinct !{!38, !39, !"_ZN3aie15parallel_lookupItNS_3lutILj4Eu6__bf16u6__bf16EELNS_6detail14lut_oor_policyE1EE5fetchITkNS_6VectorENS_6vectorItLj16EEELj16EEENS7_Iu6__bf16XT0_EEERKT_: argument 0"}
+!39 = distinct !{!39, !"_ZN3aie15parallel_lookupItNS_3lutILj4Eu6__bf16u6__bf16EELNS_6detail14lut_oor_policyE1EE5fetchITkNS_6VectorENS_6vectorItLj16EEELj16EEENS7_Iu6__bf16XT0_EEERKT_"}
 !40 = !{!41, !43}
-!41 = distinct !{!41, !42, !"_ZN3aie6detail15parallel_lookupItNS0_3lutILj4E8bfloat16S3_EELNS0_14lut_oor_policyE1EE5fetchINS_6vectorItLj16EEELj16EQaaaaleclsrTL0__4sizeELi32EleTL0_0_clsrSA_4sizeEleTL0_0_sr20native_vector_lengthIT0_EE5valueEENS8_IS3_XT0_EEERKT_: argument 0"}
-!42 = distinct !{!42, !"_ZN3aie6detail15parallel_lookupItNS0_3lutILj4E8bfloat16S3_EELNS0_14lut_oor_policyE1EE5fetchINS_6vectorItLj16EEELj16EQaaaaleclsrTL0__4sizeELi32EleTL0_0_clsrSA_4sizeEleTL0_0_sr20native_vector_lengthIT0_EE5valueEENS8_IS3_XT0_EEERKT_"}
-!43 = distinct !{!43, !44, !"_ZN3aie15parallel_lookupItNS_3lutILj4E8bfloat16S2_EELNS_6detail14lut_oor_policyE1EE5fetchITkNS_6VectorENS_6vectorItLj16EEELj16EEENS8_IS2_XT0_EEERKT_: argument 0"}
-!44 = distinct !{!44, !"_ZN3aie15parallel_lookupItNS_3lutILj4E8bfloat16S2_EELNS_6detail14lut_oor_policyE1EE5fetchITkNS_6VectorENS_6vectorItLj16EEELj16EEENS8_IS2_XT0_EEERKT_"}
+!41 = distinct !{!41, !42, !"_ZN3aie6detail15parallel_lookupItNS0_3lutILj4Eu6__bf16u6__bf16EELNS0_14lut_oor_policyE1EE5fetchINS_6vectorItLj16EEELj16EQaaaaleclsrTL0__4sizeELi32EleTL0_0_clsrS9_4sizeEleTL0_0_sr20native_vector_lengthIT0_EE5valueEENS7_Iu6__bf16XT0_EEERKT_: argument 0"}
+!42 = distinct !{!42, !"_ZN3aie6detail15parallel_lookupItNS0_3lutILj4Eu6__bf16u6__bf16EELNS0_14lut_oor_policyE1EE5fetchINS_6vectorItLj16EEELj16EQaaaaleclsrTL0__4sizeELi32EleTL0_0_clsrS9_4sizeEleTL0_0_sr20native_vector_lengthIT0_EE5valueEENS7_Iu6__bf16XT0_EEERKT_"}
+!43 = distinct !{!43, !44, !"_ZN3aie15parallel_lookupItNS_3lutILj4Eu6__bf16u6__bf16EELNS_6detail14lut_oor_policyE1EE5fetchITkNS_6VectorENS_6vectorItLj16EEELj16EEENS7_Iu6__bf16XT0_EEERKT_: argument 0"}
+!44 = distinct !{!44, !"_ZN3aie15parallel_lookupItNS_3lutILj4Eu6__bf16u6__bf16EELNS_6detail14lut_oor_policyE1EE5fetchITkNS_6VectorENS_6vectorItLj16EEELj16EEENS7_Iu6__bf16XT0_EEERKT_"}

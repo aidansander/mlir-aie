@@ -10,7 +10,7 @@
 // RUN: cp %S/testdoc.txt .
 // RUN: %PEANO_INSTALL_DIR/bin/clang %clang_aie2_args -c dut.ll -o dut.o
 // RUN: %PEANO_INSTALL_DIR/bin/clang %clang_aie2_args -c lut_based_ops.ll -o lut_based_ops.o
-// RUN: xchesscc_wrapper aie2 -f -g +s +w work +o work -I%S/../../ -I%aie_runtime_lib%/AIE2 -I %aietools/include -D__AIEARCH__=20 -D__AIENGINE__ -I. %S/../../testbench_cpp.cc dut.o lut_based_ops.o
+// RUN: xchesscc_wrapper aie2 -f -g +s +w work +o work -I%S/../../ -I%aie_runtime_lib%/AIE2 -I %aietools/include -D__AIEARCH__=20 -D__AIENGINE__ -I. %S/../../testbench.cc dut.o lut_based_ops.o
 // RUN: mkdir -p data
 // RUN: xca_udm_dbg --aiearch aie-ml -qf -T -P %aietools/data/aie_ml/lib/ -t "%S/../../../profiling.tcl ./work/a.out" >& xca_udm_dbg.stdout
 // RUN: FileCheck --input-file=./xca_udm_dbg.stdout %s

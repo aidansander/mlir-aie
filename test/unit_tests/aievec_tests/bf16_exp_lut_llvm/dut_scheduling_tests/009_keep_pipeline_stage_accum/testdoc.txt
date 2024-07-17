@@ -1,0 +1,10 @@
+    Added accumulator to accumulate matmul results into instead of storing results - this should prevent matmul from being optimized outEND_TITLE
+
+MID_EDITS: None
+
+FILE_FLOW(dut_inlined.ll): dut_inlined.cc -(peano clang)-> dut_inlined.ll
+FILE_FLOW(lut_based_ops.ll): /path/to/aie_runtime_lib/AIE2/lut_based_ops.cpp -(peano clang)-> lut_based_ops.ll
+
+
+NOTES:
+Despite the fact that the newly added register is an accumulator (only 1 accum used before), the changes caused a bunch of register spilling.

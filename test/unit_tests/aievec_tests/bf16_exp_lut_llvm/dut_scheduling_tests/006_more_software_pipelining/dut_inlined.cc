@@ -6,7 +6,7 @@ alignas(aie::vector_decl_align) extern int16 exp_flut_ab[512];
 alignas(aie::vector_decl_align) extern int16 exp_flut_cd[512];
 alignas(aie::vector_decl_align) extern unsigned char m_inv_lut[128];
 
-void dut(bfloat16 *restrict v1, bfloat16 *restrict v2) {
+extern "C" void dut(bfloat16 *restrict v1, bfloat16 *restrict v2) {
   size_t v3 = 0;
   size_t v4 = 1024;
   size_t v5 = 16;

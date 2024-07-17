@@ -1,0 +1,10 @@
+    Slightly changed schedule of pipeline in attempt to get peano to stage differently, no change in produced lst.END_TITLE
+
+MID_EDITS: None
+
+FILE_FLOW(dut_inlined.ll): dut_inlined.cc -(peano clang)-> dut_inlined.ll
+FILE_FLOW(lut_based_ops.ll): /path/to/aie_runtime_lib/AIE2/lut_based_ops.cpp -(peano clang)-> lut_based_ops.ll
+
+
+NOTES:
+change seems to have had no effect 

@@ -3,15 +3,13 @@ source_filename = "dut_inlined.cc"
 target datalayout = "e-m:e-p:20:32-i1:8:32-i8:8:32-i16:16:32-i32:32:32-f32:32:32-i64:32-f64:32-a:0:32-n32"
 target triple = "aie2"
 
-%class.bfloat16 = type { bfloat }
-
 @exp_ilut_ab = external dso_local global [512 x i16], align 32
 @exp_ilut_cd = external dso_local global [512 x i16], align 32
 @exp_flut_ab = external dso_local global [512 x i16], align 32
 @exp_flut_cd = external dso_local global [512 x i16], align 32
 
 ; Function Attrs: mustprogress nofree nounwind memory(read, argmem: readwrite)
-define dso_local void @_Z3dutP8bfloat16S0_(ptr noalias nocapture readonly %0, ptr noalias nocapture writeonly %1) local_unnamed_addr #0 {
+define dso_local void @dut(ptr noalias nocapture readonly %0, ptr noalias nocapture writeonly %1) local_unnamed_addr #0 {
   %3 = tail call noundef <16 x i32> @llvm.aie2.v16int32()
   %4 = tail call noundef <16 x i32> @llvm.aie2.vbroadcast32.I512(i32 1023)
   %5 = tail call noundef <16 x i32> @llvm.aie2.vbroadcast32.I512(i32 0)
@@ -19,14 +17,14 @@ define dso_local void @_Z3dutP8bfloat16S0_(ptr noalias nocapture readonly %0, pt
   %7 = tail call noundef <8 x i64> @llvm.aie2.v16accfloat()
   %8 = tail call noundef <16 x i16> @llvm.aie2.v16int16()
   %9 = load <16 x bfloat>, ptr %0, align 32, !tbaa !2
-  %10 = getelementptr inbounds %class.bfloat16, ptr %0, i20 16
+  %10 = getelementptr inbounds bfloat, ptr %0, i20 16
   %11 = load <16 x bfloat>, ptr %10, align 32, !tbaa !2
   %12 = tail call noundef <16 x i32> @llvm.aie2.v16bf16.to.v16i32(<16 x bfloat> %9, i32 8)
   %13 = tail call noundef <32 x i16> @llvm.aie2.v32int16()
   %14 = bitcast <32 x i16> %13 to <16 x i32>
   %15 = tail call <16 x i32> @llvm.aie2.vshuffle(<16 x i32> %12, <16 x i32> %14, i32 2)
   %16 = tail call <8 x i32> @llvm.aie2.ext.I256.I512(<16 x i32> %15, i32 0)
-  %17 = getelementptr inbounds %class.bfloat16, ptr %0, i20 32
+  %17 = getelementptr inbounds bfloat, ptr %0, i20 32
   %18 = load <16 x bfloat>, ptr %17, align 32, !tbaa !2
   %19 = tail call noundef <16 x i32> @llvm.aie2.v16bf16.to.v16i32(<16 x bfloat> %11, i32 8)
   %20 = tail call <16 x i32> @llvm.aie2.vshuffle(<16 x i32> %19, <16 x i32> %14, i32 2)
@@ -76,7 +74,7 @@ define dso_local void @_Z3dutP8bfloat16S0_(ptr noalias nocapture readonly %0, pt
   %64 = tail call <16 x i32> @llvm.aie2.vshuffle(<16 x i32> %58, <16 x i32> %63, i32 24)
   %65 = bitcast <16 x i32> %64 to <32 x bfloat>
   %66 = tail call <16 x bfloat> @llvm.aie2.ext.bf256.bf512(<32 x bfloat> %65, i32 0)
-  %67 = getelementptr %class.bfloat16, ptr %0, i20 48
+  %67 = getelementptr bfloat, ptr %0, i20 48
   br label %159
 
 68:                                               ; preds = %159
@@ -122,7 +120,7 @@ define dso_local void @_Z3dutP8bfloat16S0_(ptr noalias nocapture readonly %0, pt
   %108 = tail call <32 x bfloat> @llvm.aie2.upd.bf512.bf256(<32 x bfloat> %107, <16 x bfloat> %205, i32 1)
   %109 = tail call noundef <8 x i64> @llvm.aie2.bf.mul16.conf(<32 x bfloat> %106, <32 x bfloat> %108, i32 60)
   %110 = tail call noundef <16 x bfloat> @llvm.aie2.v16accfloat.to.v16bf16(<8 x i64> %109)
-  %111 = getelementptr inbounds %class.bfloat16, ptr %1, i20 976
+  %111 = getelementptr inbounds bfloat, ptr %1, i20 976
   store <16 x bfloat> %110, ptr %111, align 32, !tbaa !2
   %112 = bitcast <8 x i32> %72 to <16 x i16>
   %113 = tail call noundef <16 x i64> @llvm.aie2.acc64.v16.I256.ups(<16 x i16> %112, i32 0, i32 0)
@@ -163,7 +161,7 @@ define dso_local void @_Z3dutP8bfloat16S0_(ptr noalias nocapture readonly %0, pt
   %148 = tail call <32 x bfloat> @llvm.aie2.upd.bf512.bf256(<32 x bfloat> %147, <16 x bfloat> %205, i32 1)
   %149 = tail call noundef <8 x i64> @llvm.aie2.bf.mul16.conf(<32 x bfloat> %146, <32 x bfloat> %148, i32 60)
   %150 = tail call noundef <16 x bfloat> @llvm.aie2.v16accfloat.to.v16bf16(<8 x i64> %149)
-  %151 = getelementptr inbounds %class.bfloat16, ptr %1, i20 992
+  %151 = getelementptr inbounds bfloat, ptr %1, i20 992
   store <16 x bfloat> %150, ptr %151, align 32, !tbaa !2
   %152 = tail call <32 x bfloat> @llvm.aie2.set.bf512.bf256(<16 x bfloat> %128, i32 0)
   %153 = tail call <32 x bfloat> @llvm.aie2.upd.bf512.bf256(<32 x bfloat> %152, <16 x bfloat> %205, i32 1)
@@ -171,7 +169,7 @@ define dso_local void @_Z3dutP8bfloat16S0_(ptr noalias nocapture readonly %0, pt
   %155 = tail call <32 x bfloat> @llvm.aie2.upd.bf512.bf256(<32 x bfloat> %154, <16 x bfloat> %205, i32 1)
   %156 = tail call noundef <8 x i64> @llvm.aie2.bf.mul16.conf(<32 x bfloat> %153, <32 x bfloat> %155, i32 60)
   %157 = tail call noundef <16 x bfloat> @llvm.aie2.v16accfloat.to.v16bf16(<8 x i64> %156)
-  %158 = getelementptr inbounds %class.bfloat16, ptr %1, i20 1008
+  %158 = getelementptr inbounds bfloat, ptr %1, i20 1008
   store <16 x bfloat> %157, ptr %158, align 32, !tbaa !2
   ret void
 
@@ -183,7 +181,7 @@ define dso_local void @_Z3dutP8bfloat16S0_(ptr noalias nocapture readonly %0, pt
   %164 = phi <8 x i32> [ %21, %2 ], [ %222, %214 ]
   %165 = bitcast <8 x i32> %164 to <16 x i16>
   %166 = trunc i32 %160 to i20
-  %167 = getelementptr %class.bfloat16, ptr %67, i20 %166
+  %167 = getelementptr bfloat, ptr %67, i20 %166
   %168 = load <16 x bfloat>, ptr %167, align 32, !tbaa !2
   %169 = tail call noundef <16 x i32> @llvm.aie2.v16bf16.to.v16i32(<16 x bfloat> %161, i32 8)
   %170 = tail call <16 x i32> @llvm.aie2.vshuffle(<16 x i32> %169, <16 x i32> %14, i32 2)
@@ -228,8 +226,8 @@ define dso_local void @_Z3dutP8bfloat16S0_(ptr noalias nocapture readonly %0, pt
   %209 = tail call <32 x bfloat> @llvm.aie2.upd.bf512.bf256(<32 x bfloat> %208, <16 x bfloat> %205, i32 1)
   %210 = tail call noundef <8 x i64> @llvm.aie2.bf.mul16.conf(<32 x bfloat> %207, <32 x bfloat> %209, i32 60)
   %211 = tail call noundef <16 x bfloat> @llvm.aie2.v16accfloat.to.v16bf16(<8 x i64> %210)
-  %212 = getelementptr inbounds %class.bfloat16, ptr %1, i20 %166
-  store <16 x bfloat> %211, ptr %212, align 32, !tbaa !2, !noalias !35
+  %212 = getelementptr inbounds bfloat, ptr %1, i20 %166
+  store <16 x bfloat> %211, ptr %212, align 32, !tbaa !2
   %213 = icmp ult i32 %160, 960
   br i1 %213, label %214, label %68, !llvm.loop !45
 
@@ -237,7 +235,7 @@ define dso_local void @_Z3dutP8bfloat16S0_(ptr noalias nocapture readonly %0, pt
   %215 = or disjoint i32 %160, 16
   %216 = bitcast <8 x i32> %171 to <16 x i16>
   %217 = trunc i32 %215 to i20
-  %218 = getelementptr %class.bfloat16, ptr %67, i20 %217
+  %218 = getelementptr bfloat, ptr %67, i20 %217
   %219 = load <16 x bfloat>, ptr %218, align 32, !tbaa !2
   %220 = tail call noundef <16 x i32> @llvm.aie2.v16bf16.to.v16i32(<16 x bfloat> %168, i32 8)
   %221 = tail call <16 x i32> @llvm.aie2.vshuffle(<16 x i32> %220, <16 x i32> %14, i32 2)
@@ -282,10 +280,10 @@ define dso_local void @_Z3dutP8bfloat16S0_(ptr noalias nocapture readonly %0, pt
   %260 = tail call <32 x bfloat> @llvm.aie2.upd.bf512.bf256(<32 x bfloat> %259, <16 x bfloat> %256, i32 1)
   %261 = tail call noundef <8 x i64> @llvm.aie2.bf.mul16.conf(<32 x bfloat> %258, <32 x bfloat> %260, i32 60)
   %262 = tail call noundef <16 x bfloat> @llvm.aie2.v16accfloat.to.v16bf16(<8 x i64> %261)
-  %263 = getelementptr inbounds %class.bfloat16, ptr %1, i20 %217
+  %263 = getelementptr inbounds bfloat, ptr %1, i20 %217
   store <16 x bfloat> %262, ptr %263, align 32, !tbaa !2
   %264 = add nuw nsw i32 %160, 32
-  br label %159
+  br label %159, !llvm.loop !45
 }
 
 ; Function Attrs: nofree nosync nounwind memory(none)
@@ -373,44 +371,44 @@ attributes #4 = { mustprogress nocallback nofree nosync nounwind willreturn memo
 !3 = !{!"omnipotent char", !4, i64 0}
 !4 = !{!"Simple C++ TBAA"}
 !5 = !{!6, !8}
-!6 = distinct !{!6, !7, !"_ZN3aie6detail15parallel_lookupItNS0_3lutILj4E8bfloat16S3_EELNS0_14lut_oor_policyE1EE5fetchINS_6vectorItLj16EEELj16EQaaaaleclsrTL0__4sizeELi32EleTL0_0_clsrSA_4sizeEleTL0_0_sr20native_vector_lengthIT0_EE5valueEENS8_IS3_XT0_EEERKT_: argument 0"}
-!7 = distinct !{!7, !"_ZN3aie6detail15parallel_lookupItNS0_3lutILj4E8bfloat16S3_EELNS0_14lut_oor_policyE1EE5fetchINS_6vectorItLj16EEELj16EQaaaaleclsrTL0__4sizeELi32EleTL0_0_clsrSA_4sizeEleTL0_0_sr20native_vector_lengthIT0_EE5valueEENS8_IS3_XT0_EEERKT_"}
-!8 = distinct !{!8, !9, !"_ZN3aie15parallel_lookupItNS_3lutILj4E8bfloat16S2_EELNS_6detail14lut_oor_policyE1EE5fetchITkNS_6VectorENS_6vectorItLj16EEELj16EEENS8_IS2_XT0_EEERKT_: argument 0"}
-!9 = distinct !{!9, !"_ZN3aie15parallel_lookupItNS_3lutILj4E8bfloat16S2_EELNS_6detail14lut_oor_policyE1EE5fetchITkNS_6VectorENS_6vectorItLj16EEELj16EEENS8_IS2_XT0_EEERKT_"}
+!6 = distinct !{!6, !7, !"_ZN3aie6detail15parallel_lookupItNS0_3lutILj4Eu6__bf16u6__bf16EELNS0_14lut_oor_policyE1EE5fetchINS_6vectorItLj16EEELj16EQaaaaleclsrTL0__4sizeELi32EleTL0_0_clsrS9_4sizeEleTL0_0_sr20native_vector_lengthIT0_EE5valueEENS7_Iu6__bf16XT0_EEERKT_: argument 0"}
+!7 = distinct !{!7, !"_ZN3aie6detail15parallel_lookupItNS0_3lutILj4Eu6__bf16u6__bf16EELNS0_14lut_oor_policyE1EE5fetchINS_6vectorItLj16EEELj16EQaaaaleclsrTL0__4sizeELi32EleTL0_0_clsrS9_4sizeEleTL0_0_sr20native_vector_lengthIT0_EE5valueEENS7_Iu6__bf16XT0_EEERKT_"}
+!8 = distinct !{!8, !9, !"_ZN3aie15parallel_lookupItNS_3lutILj4Eu6__bf16u6__bf16EELNS_6detail14lut_oor_policyE1EE5fetchITkNS_6VectorENS_6vectorItLj16EEELj16EEENS7_Iu6__bf16XT0_EEERKT_: argument 0"}
+!9 = distinct !{!9, !"_ZN3aie15parallel_lookupItNS_3lutILj4Eu6__bf16u6__bf16EELNS_6detail14lut_oor_policyE1EE5fetchITkNS_6VectorENS_6vectorItLj16EEELj16EEENS7_Iu6__bf16XT0_EEERKT_"}
 !10 = !{!11, !13}
-!11 = distinct !{!11, !12, !"_ZN3aie6detail15parallel_lookupItNS0_3lutILj4E8bfloat16S3_EELNS0_14lut_oor_policyE1EE5fetchINS_6vectorItLj16EEELj16EQaaaaleclsrTL0__4sizeELi32EleTL0_0_clsrSA_4sizeEleTL0_0_sr20native_vector_lengthIT0_EE5valueEENS8_IS3_XT0_EEERKT_: argument 0"}
-!12 = distinct !{!12, !"_ZN3aie6detail15parallel_lookupItNS0_3lutILj4E8bfloat16S3_EELNS0_14lut_oor_policyE1EE5fetchINS_6vectorItLj16EEELj16EQaaaaleclsrTL0__4sizeELi32EleTL0_0_clsrSA_4sizeEleTL0_0_sr20native_vector_lengthIT0_EE5valueEENS8_IS3_XT0_EEERKT_"}
-!13 = distinct !{!13, !14, !"_ZN3aie15parallel_lookupItNS_3lutILj4E8bfloat16S2_EELNS_6detail14lut_oor_policyE1EE5fetchITkNS_6VectorENS_6vectorItLj16EEELj16EEENS8_IS2_XT0_EEERKT_: argument 0"}
-!14 = distinct !{!14, !"_ZN3aie15parallel_lookupItNS_3lutILj4E8bfloat16S2_EELNS_6detail14lut_oor_policyE1EE5fetchITkNS_6VectorENS_6vectorItLj16EEELj16EEENS8_IS2_XT0_EEERKT_"}
+!11 = distinct !{!11, !12, !"_ZN3aie6detail15parallel_lookupItNS0_3lutILj4Eu6__bf16u6__bf16EELNS0_14lut_oor_policyE1EE5fetchINS_6vectorItLj16EEELj16EQaaaaleclsrTL0__4sizeELi32EleTL0_0_clsrS9_4sizeEleTL0_0_sr20native_vector_lengthIT0_EE5valueEENS7_Iu6__bf16XT0_EEERKT_: argument 0"}
+!12 = distinct !{!12, !"_ZN3aie6detail15parallel_lookupItNS0_3lutILj4Eu6__bf16u6__bf16EELNS0_14lut_oor_policyE1EE5fetchINS_6vectorItLj16EEELj16EQaaaaleclsrTL0__4sizeELi32EleTL0_0_clsrS9_4sizeEleTL0_0_sr20native_vector_lengthIT0_EE5valueEENS7_Iu6__bf16XT0_EEERKT_"}
+!13 = distinct !{!13, !14, !"_ZN3aie15parallel_lookupItNS_3lutILj4Eu6__bf16u6__bf16EELNS_6detail14lut_oor_policyE1EE5fetchITkNS_6VectorENS_6vectorItLj16EEELj16EEENS7_Iu6__bf16XT0_EEERKT_: argument 0"}
+!14 = distinct !{!14, !"_ZN3aie15parallel_lookupItNS_3lutILj4Eu6__bf16u6__bf16EELNS_6detail14lut_oor_policyE1EE5fetchITkNS_6VectorENS_6vectorItLj16EEELj16EEENS7_Iu6__bf16XT0_EEERKT_"}
 !15 = !{!16, !18}
-!16 = distinct !{!16, !17, !"_ZN3aie6detail15parallel_lookupItNS0_3lutILj4E8bfloat16S3_EELNS0_14lut_oor_policyE1EE5fetchINS_6vectorItLj16EEELj16EQaaaaleclsrTL0__4sizeELi32EleTL0_0_clsrSA_4sizeEleTL0_0_sr20native_vector_lengthIT0_EE5valueEENS8_IS3_XT0_EEERKT_: argument 0"}
-!17 = distinct !{!17, !"_ZN3aie6detail15parallel_lookupItNS0_3lutILj4E8bfloat16S3_EELNS0_14lut_oor_policyE1EE5fetchINS_6vectorItLj16EEELj16EQaaaaleclsrTL0__4sizeELi32EleTL0_0_clsrSA_4sizeEleTL0_0_sr20native_vector_lengthIT0_EE5valueEENS8_IS3_XT0_EEERKT_"}
-!18 = distinct !{!18, !19, !"_ZN3aie15parallel_lookupItNS_3lutILj4E8bfloat16S2_EELNS_6detail14lut_oor_policyE1EE5fetchITkNS_6VectorENS_6vectorItLj16EEELj16EEENS8_IS2_XT0_EEERKT_: argument 0"}
-!19 = distinct !{!19, !"_ZN3aie15parallel_lookupItNS_3lutILj4E8bfloat16S2_EELNS_6detail14lut_oor_policyE1EE5fetchITkNS_6VectorENS_6vectorItLj16EEELj16EEENS8_IS2_XT0_EEERKT_"}
+!16 = distinct !{!16, !17, !"_ZN3aie6detail15parallel_lookupItNS0_3lutILj4Eu6__bf16u6__bf16EELNS0_14lut_oor_policyE1EE5fetchINS_6vectorItLj16EEELj16EQaaaaleclsrTL0__4sizeELi32EleTL0_0_clsrS9_4sizeEleTL0_0_sr20native_vector_lengthIT0_EE5valueEENS7_Iu6__bf16XT0_EEERKT_: argument 0"}
+!17 = distinct !{!17, !"_ZN3aie6detail15parallel_lookupItNS0_3lutILj4Eu6__bf16u6__bf16EELNS0_14lut_oor_policyE1EE5fetchINS_6vectorItLj16EEELj16EQaaaaleclsrTL0__4sizeELi32EleTL0_0_clsrS9_4sizeEleTL0_0_sr20native_vector_lengthIT0_EE5valueEENS7_Iu6__bf16XT0_EEERKT_"}
+!18 = distinct !{!18, !19, !"_ZN3aie15parallel_lookupItNS_3lutILj4Eu6__bf16u6__bf16EELNS_6detail14lut_oor_policyE1EE5fetchITkNS_6VectorENS_6vectorItLj16EEELj16EEENS7_Iu6__bf16XT0_EEERKT_: argument 0"}
+!19 = distinct !{!19, !"_ZN3aie15parallel_lookupItNS_3lutILj4Eu6__bf16u6__bf16EELNS_6detail14lut_oor_policyE1EE5fetchITkNS_6VectorENS_6vectorItLj16EEELj16EEENS7_Iu6__bf16XT0_EEERKT_"}
 !20 = !{!21, !23}
-!21 = distinct !{!21, !22, !"_ZN3aie6detail15parallel_lookupItNS0_3lutILj4E8bfloat16S3_EELNS0_14lut_oor_policyE1EE5fetchINS_6vectorItLj16EEELj16EQaaaaleclsrTL0__4sizeELi32EleTL0_0_clsrSA_4sizeEleTL0_0_sr20native_vector_lengthIT0_EE5valueEENS8_IS3_XT0_EEERKT_: argument 0"}
-!22 = distinct !{!22, !"_ZN3aie6detail15parallel_lookupItNS0_3lutILj4E8bfloat16S3_EELNS0_14lut_oor_policyE1EE5fetchINS_6vectorItLj16EEELj16EQaaaaleclsrTL0__4sizeELi32EleTL0_0_clsrSA_4sizeEleTL0_0_sr20native_vector_lengthIT0_EE5valueEENS8_IS3_XT0_EEERKT_"}
-!23 = distinct !{!23, !24, !"_ZN3aie15parallel_lookupItNS_3lutILj4E8bfloat16S2_EELNS_6detail14lut_oor_policyE1EE5fetchITkNS_6VectorENS_6vectorItLj16EEELj16EEENS8_IS2_XT0_EEERKT_: argument 0"}
-!24 = distinct !{!24, !"_ZN3aie15parallel_lookupItNS_3lutILj4E8bfloat16S2_EELNS_6detail14lut_oor_policyE1EE5fetchITkNS_6VectorENS_6vectorItLj16EEELj16EEENS8_IS2_XT0_EEERKT_"}
+!21 = distinct !{!21, !22, !"_ZN3aie6detail15parallel_lookupItNS0_3lutILj4Eu6__bf16u6__bf16EELNS0_14lut_oor_policyE1EE5fetchINS_6vectorItLj16EEELj16EQaaaaleclsrTL0__4sizeELi32EleTL0_0_clsrS9_4sizeEleTL0_0_sr20native_vector_lengthIT0_EE5valueEENS7_Iu6__bf16XT0_EEERKT_: argument 0"}
+!22 = distinct !{!22, !"_ZN3aie6detail15parallel_lookupItNS0_3lutILj4Eu6__bf16u6__bf16EELNS0_14lut_oor_policyE1EE5fetchINS_6vectorItLj16EEELj16EQaaaaleclsrTL0__4sizeELi32EleTL0_0_clsrS9_4sizeEleTL0_0_sr20native_vector_lengthIT0_EE5valueEENS7_Iu6__bf16XT0_EEERKT_"}
+!23 = distinct !{!23, !24, !"_ZN3aie15parallel_lookupItNS_3lutILj4Eu6__bf16u6__bf16EELNS_6detail14lut_oor_policyE1EE5fetchITkNS_6VectorENS_6vectorItLj16EEELj16EEENS7_Iu6__bf16XT0_EEERKT_: argument 0"}
+!24 = distinct !{!24, !"_ZN3aie15parallel_lookupItNS_3lutILj4Eu6__bf16u6__bf16EELNS_6detail14lut_oor_policyE1EE5fetchITkNS_6VectorENS_6vectorItLj16EEELj16EEENS7_Iu6__bf16XT0_EEERKT_"}
 !25 = !{!26, !28}
-!26 = distinct !{!26, !27, !"_ZN3aie6detail15parallel_lookupItNS0_3lutILj4E8bfloat16S3_EELNS0_14lut_oor_policyE1EE5fetchINS_6vectorItLj16EEELj16EQaaaaleclsrTL0__4sizeELi32EleTL0_0_clsrSA_4sizeEleTL0_0_sr20native_vector_lengthIT0_EE5valueEENS8_IS3_XT0_EEERKT_: argument 0"}
-!27 = distinct !{!27, !"_ZN3aie6detail15parallel_lookupItNS0_3lutILj4E8bfloat16S3_EELNS0_14lut_oor_policyE1EE5fetchINS_6vectorItLj16EEELj16EQaaaaleclsrTL0__4sizeELi32EleTL0_0_clsrSA_4sizeEleTL0_0_sr20native_vector_lengthIT0_EE5valueEENS8_IS3_XT0_EEERKT_"}
-!28 = distinct !{!28, !29, !"_ZN3aie15parallel_lookupItNS_3lutILj4E8bfloat16S2_EELNS_6detail14lut_oor_policyE1EE5fetchITkNS_6VectorENS_6vectorItLj16EEELj16EEENS8_IS2_XT0_EEERKT_: argument 0"}
-!29 = distinct !{!29, !"_ZN3aie15parallel_lookupItNS_3lutILj4E8bfloat16S2_EELNS_6detail14lut_oor_policyE1EE5fetchITkNS_6VectorENS_6vectorItLj16EEELj16EEENS8_IS2_XT0_EEERKT_"}
+!26 = distinct !{!26, !27, !"_ZN3aie6detail15parallel_lookupItNS0_3lutILj4Eu6__bf16u6__bf16EELNS0_14lut_oor_policyE1EE5fetchINS_6vectorItLj16EEELj16EQaaaaleclsrTL0__4sizeELi32EleTL0_0_clsrS9_4sizeEleTL0_0_sr20native_vector_lengthIT0_EE5valueEENS7_Iu6__bf16XT0_EEERKT_: argument 0"}
+!27 = distinct !{!27, !"_ZN3aie6detail15parallel_lookupItNS0_3lutILj4Eu6__bf16u6__bf16EELNS0_14lut_oor_policyE1EE5fetchINS_6vectorItLj16EEELj16EQaaaaleclsrTL0__4sizeELi32EleTL0_0_clsrS9_4sizeEleTL0_0_sr20native_vector_lengthIT0_EE5valueEENS7_Iu6__bf16XT0_EEERKT_"}
+!28 = distinct !{!28, !29, !"_ZN3aie15parallel_lookupItNS_3lutILj4Eu6__bf16u6__bf16EELNS_6detail14lut_oor_policyE1EE5fetchITkNS_6VectorENS_6vectorItLj16EEELj16EEENS7_Iu6__bf16XT0_EEERKT_: argument 0"}
+!29 = distinct !{!29, !"_ZN3aie15parallel_lookupItNS_3lutILj4Eu6__bf16u6__bf16EELNS_6detail14lut_oor_policyE1EE5fetchITkNS_6VectorENS_6vectorItLj16EEELj16EEENS7_Iu6__bf16XT0_EEERKT_"}
 !30 = !{!31, !33}
-!31 = distinct !{!31, !32, !"_ZN3aie6detail15parallel_lookupItNS0_3lutILj4E8bfloat16S3_EELNS0_14lut_oor_policyE1EE5fetchINS_6vectorItLj16EEELj16EQaaaaleclsrTL0__4sizeELi32EleTL0_0_clsrSA_4sizeEleTL0_0_sr20native_vector_lengthIT0_EE5valueEENS8_IS3_XT0_EEERKT_: argument 0"}
-!32 = distinct !{!32, !"_ZN3aie6detail15parallel_lookupItNS0_3lutILj4E8bfloat16S3_EELNS0_14lut_oor_policyE1EE5fetchINS_6vectorItLj16EEELj16EQaaaaleclsrTL0__4sizeELi32EleTL0_0_clsrSA_4sizeEleTL0_0_sr20native_vector_lengthIT0_EE5valueEENS8_IS3_XT0_EEERKT_"}
-!33 = distinct !{!33, !34, !"_ZN3aie15parallel_lookupItNS_3lutILj4E8bfloat16S2_EELNS_6detail14lut_oor_policyE1EE5fetchITkNS_6VectorENS_6vectorItLj16EEELj16EEENS8_IS2_XT0_EEERKT_: argument 0"}
-!34 = distinct !{!34, !"_ZN3aie15parallel_lookupItNS_3lutILj4E8bfloat16S2_EELNS_6detail14lut_oor_policyE1EE5fetchITkNS_6VectorENS_6vectorItLj16EEELj16EEENS8_IS2_XT0_EEERKT_"}
+!31 = distinct !{!31, !32, !"_ZN3aie6detail15parallel_lookupItNS0_3lutILj4Eu6__bf16u6__bf16EELNS0_14lut_oor_policyE1EE5fetchINS_6vectorItLj16EEELj16EQaaaaleclsrTL0__4sizeELi32EleTL0_0_clsrS9_4sizeEleTL0_0_sr20native_vector_lengthIT0_EE5valueEENS7_Iu6__bf16XT0_EEERKT_: argument 0"}
+!32 = distinct !{!32, !"_ZN3aie6detail15parallel_lookupItNS0_3lutILj4Eu6__bf16u6__bf16EELNS0_14lut_oor_policyE1EE5fetchINS_6vectorItLj16EEELj16EQaaaaleclsrTL0__4sizeELi32EleTL0_0_clsrS9_4sizeEleTL0_0_sr20native_vector_lengthIT0_EE5valueEENS7_Iu6__bf16XT0_EEERKT_"}
+!33 = distinct !{!33, !34, !"_ZN3aie15parallel_lookupItNS_3lutILj4Eu6__bf16u6__bf16EELNS_6detail14lut_oor_policyE1EE5fetchITkNS_6VectorENS_6vectorItLj16EEELj16EEENS7_Iu6__bf16XT0_EEERKT_: argument 0"}
+!34 = distinct !{!34, !"_ZN3aie15parallel_lookupItNS_3lutILj4Eu6__bf16u6__bf16EELNS_6detail14lut_oor_policyE1EE5fetchITkNS_6VectorENS_6vectorItLj16EEELj16EEENS7_Iu6__bf16XT0_EEERKT_"}
 !35 = !{!36, !38}
-!36 = distinct !{!36, !37, !"_ZN3aie6detail15parallel_lookupItNS0_3lutILj4E8bfloat16S3_EELNS0_14lut_oor_policyE1EE5fetchINS_6vectorItLj16EEELj16EQaaaaleclsrTL0__4sizeELi32EleTL0_0_clsrSA_4sizeEleTL0_0_sr20native_vector_lengthIT0_EE5valueEENS8_IS3_XT0_EEERKT_: argument 0"}
-!37 = distinct !{!37, !"_ZN3aie6detail15parallel_lookupItNS0_3lutILj4E8bfloat16S3_EELNS0_14lut_oor_policyE1EE5fetchINS_6vectorItLj16EEELj16EQaaaaleclsrTL0__4sizeELi32EleTL0_0_clsrSA_4sizeEleTL0_0_sr20native_vector_lengthIT0_EE5valueEENS8_IS3_XT0_EEERKT_"}
-!38 = distinct !{!38, !39, !"_ZN3aie15parallel_lookupItNS_3lutILj4E8bfloat16S2_EELNS_6detail14lut_oor_policyE1EE5fetchITkNS_6VectorENS_6vectorItLj16EEELj16EEENS8_IS2_XT0_EEERKT_: argument 0"}
-!39 = distinct !{!39, !"_ZN3aie15parallel_lookupItNS_3lutILj4E8bfloat16S2_EELNS_6detail14lut_oor_policyE1EE5fetchITkNS_6VectorENS_6vectorItLj16EEELj16EEENS8_IS2_XT0_EEERKT_"}
+!36 = distinct !{!36, !37, !"_ZN3aie6detail15parallel_lookupItNS0_3lutILj4Eu6__bf16u6__bf16EELNS0_14lut_oor_policyE1EE5fetchINS_6vectorItLj16EEELj16EQaaaaleclsrTL0__4sizeELi32EleTL0_0_clsrS9_4sizeEleTL0_0_sr20native_vector_lengthIT0_EE5valueEENS7_Iu6__bf16XT0_EEERKT_: argument 0"}
+!37 = distinct !{!37, !"_ZN3aie6detail15parallel_lookupItNS0_3lutILj4Eu6__bf16u6__bf16EELNS0_14lut_oor_policyE1EE5fetchINS_6vectorItLj16EEELj16EQaaaaleclsrTL0__4sizeELi32EleTL0_0_clsrS9_4sizeEleTL0_0_sr20native_vector_lengthIT0_EE5valueEENS7_Iu6__bf16XT0_EEERKT_"}
+!38 = distinct !{!38, !39, !"_ZN3aie15parallel_lookupItNS_3lutILj4Eu6__bf16u6__bf16EELNS_6detail14lut_oor_policyE1EE5fetchITkNS_6VectorENS_6vectorItLj16EEELj16EEENS7_Iu6__bf16XT0_EEERKT_: argument 0"}
+!39 = distinct !{!39, !"_ZN3aie15parallel_lookupItNS_3lutILj4Eu6__bf16u6__bf16EELNS_6detail14lut_oor_policyE1EE5fetchITkNS_6VectorENS_6vectorItLj16EEELj16EEENS7_Iu6__bf16XT0_EEERKT_"}
 !40 = !{!41, !43}
-!41 = distinct !{!41, !42, !"_ZN3aie6detail15parallel_lookupItNS0_3lutILj4E8bfloat16S3_EELNS0_14lut_oor_policyE1EE5fetchINS_6vectorItLj16EEELj16EQaaaaleclsrTL0__4sizeELi32EleTL0_0_clsrSA_4sizeEleTL0_0_sr20native_vector_lengthIT0_EE5valueEENS8_IS3_XT0_EEERKT_: argument 0"}
-!42 = distinct !{!42, !"_ZN3aie6detail15parallel_lookupItNS0_3lutILj4E8bfloat16S3_EELNS0_14lut_oor_policyE1EE5fetchINS_6vectorItLj16EEELj16EQaaaaleclsrTL0__4sizeELi32EleTL0_0_clsrSA_4sizeEleTL0_0_sr20native_vector_lengthIT0_EE5valueEENS8_IS3_XT0_EEERKT_"}
-!43 = distinct !{!43, !44, !"_ZN3aie15parallel_lookupItNS_3lutILj4E8bfloat16S2_EELNS_6detail14lut_oor_policyE1EE5fetchITkNS_6VectorENS_6vectorItLj16EEELj16EEENS8_IS2_XT0_EEERKT_: argument 0"}
-!44 = distinct !{!44, !"_ZN3aie15parallel_lookupItNS_3lutILj4E8bfloat16S2_EELNS_6detail14lut_oor_policyE1EE5fetchITkNS_6VectorENS_6vectorItLj16EEELj16EEENS8_IS2_XT0_EEERKT_"}
+!41 = distinct !{!41, !42, !"_ZN3aie6detail15parallel_lookupItNS0_3lutILj4Eu6__bf16u6__bf16EELNS0_14lut_oor_policyE1EE5fetchINS_6vectorItLj16EEELj16EQaaaaleclsrTL0__4sizeELi32EleTL0_0_clsrS9_4sizeEleTL0_0_sr20native_vector_lengthIT0_EE5valueEENS7_Iu6__bf16XT0_EEERKT_: argument 0"}
+!42 = distinct !{!42, !"_ZN3aie6detail15parallel_lookupItNS0_3lutILj4Eu6__bf16u6__bf16EELNS0_14lut_oor_policyE1EE5fetchINS_6vectorItLj16EEELj16EQaaaaleclsrTL0__4sizeELi32EleTL0_0_clsrS9_4sizeEleTL0_0_sr20native_vector_lengthIT0_EE5valueEENS7_Iu6__bf16XT0_EEERKT_"}
+!43 = distinct !{!43, !44, !"_ZN3aie15parallel_lookupItNS_3lutILj4Eu6__bf16u6__bf16EELNS_6detail14lut_oor_policyE1EE5fetchITkNS_6VectorENS_6vectorItLj16EEELj16EEENS7_Iu6__bf16XT0_EEERKT_: argument 0"}
+!44 = distinct !{!44, !"_ZN3aie15parallel_lookupItNS_3lutILj4Eu6__bf16u6__bf16EELNS_6detail14lut_oor_policyE1EE5fetchITkNS_6VectorENS_6vectorItLj16EEELj16EEENS7_Iu6__bf16XT0_EEERKT_"}
 !45 = distinct !{!45, !46}
 !46 = !{!"llvm.loop.mustprogress"}

@@ -1,0 +1,11 @@
+    Removed stores, test case should now fail, but curious to see impact on performance END_TITLE
+
+MID_EDITS: None
+
+FILE_FLOW(dut_inlined.ll): dut_inlined.cc -(peano clang)-> dut_inlined.ll
+FILE_FLOW(lut_based_ops.ll): /path/to/aie_runtime_lib/AIE2/lut_based_ops.cpp -(peano clang)-> lut_based_ops.ll
+
+
+NOTES:
+Unused matmul essentially caused one pipeline stage to be optimized out of existence, so paradoxically commenting out the store REDUCES performance.
+
