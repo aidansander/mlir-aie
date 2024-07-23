@@ -17,7 +17,7 @@
 // CHECK: TEST PASSED
 
 module {
-  func.func @dut(%arg0: memref<1024xbf16>, %arg1: memref<1024xbf16>) {
+  func.func @dut(%arg0: memref<1024xbf16> {llvm.noalias}, %arg1: memref<1024xbf16> {llvm.noalias}) {
     memref.assume_alignment %arg0, 32 : memref<1024xbf16>
     memref.assume_alignment %arg1, 32 : memref<1024xbf16>
     affine.for %arg3 = 0 to 1024 {

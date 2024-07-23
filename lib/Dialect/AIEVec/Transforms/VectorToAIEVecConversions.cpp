@@ -1786,7 +1786,7 @@ struct FuseExtIntoUPDPattern : OpConversionPattern<aievec::ExtOp> {
   }
 };
 
-struct ComputeExpOpByLUTPattern_func : OpConversionPattern<math::ExpOp> {
+struct ComputeExpOpByLUTPattern_llvm : OpConversionPattern<math::ExpOp> {
   using OpConversionPattern::OpConversionPattern;
 
   LogicalResult
@@ -1812,10 +1812,8 @@ struct ComputeExpOpByLUTPattern_func : OpConversionPattern<math::ExpOp> {
     func::FuncOp fn_op_lookup = st.lookup<func::FuncOp>(funcName);
 
     func::FuncOp fn_op;
-    Type bf16_type = mlir::BFloat16Type::get(rewriter.getContext());
-    VectorType vec_in = mlir::VectorType::get({16}, bf16_type);
-    Type byte_type = mlir::IntegerType::get(rewriter.getContext(), 64, mlir::IntegerType::Signless);
-    VectorType vec_out = mlir::VectorType::get({8}, byte_type);
+    VectorType vec_in = mlir::VectorType::get({16}, rewriter.getBF16Type());
+    VectorType vec_out = mlir::VectorType::get({8}, rewriter.getI64Type());
     //if the function is already declared, use the existing function, don't declare multiple times
     if (fn_op_lookup != NULL){
         fn_op = fn_op_lookup;
@@ -2991,15 +2989,18 @@ static void populateAIEVecV2ConversionPatterns(RewritePatternSet &patterns,
         LowerVectorTransferReadToAIEUPD
       >(patterns.getContext(), 128, 1024, 256, 1024);
     patterns.add<
+        ComputeExpOpByLUTPattern,
         LowerVectorAddFOpToAIEVecAddElemOp,
         LowerVectorSubFOpToAIEVecSubElemOp,
         LowerVectorAddIOpToAIEVecAddElemOp,
         LowerVectorSubIOpToAIEVecSubElemOp
       >(patterns.getContext());
+  } else if (backend == TargetBackend::LLVMIR){
+      patterns.add<
+      ComputeExpOpByLUTPattern_llvm
+      >(patterns.getContext());
   }
   patterns.add<
-      //ComputeExpOpByLUTPattern,
-      ComputeExpOpByLUTPattern_func,
       ComputeInvOpByLUTPattern,
       ComputeTanhOpByLUTPattern,
       ComputeSqrtOpPattern,
