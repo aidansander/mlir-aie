@@ -25,6 +25,7 @@
 #include "mlir/Dialect/SCF/IR/SCF.h"
 #include "mlir/IR/PatternMatch.h"
 #include "mlir/IR/TypeUtilities.h"
+#include "mlir/IR/SymbolTable.h"
 #include "mlir/Pass/PassManager.h"
 #include "mlir/Transforms/DialectConversion.h"
 #include "mlir/Transforms/Passes.h"
@@ -1806,17 +1807,26 @@ struct ComputeExpOpByLUTPattern_func : OpConversionPattern<math::ExpOp> {
     auto moduleOp = expOp->getParentOfType<mlir::ModuleOp>();
     rewriter.setInsertionPointToStart(
         &moduleOp.getRegion().getBlocks().front());
-    
 
+    SymbolTable st = SymbolTable(moduleOp);
+    func::FuncOp fn_op_lookup = st.lookup<func::FuncOp>(funcName);
+
+    func::FuncOp fn_op;
     Type bf16_type = mlir::BFloat16Type::get(rewriter.getContext());
     VectorType vec_in = mlir::VectorType::get({16}, bf16_type);
     Type byte_type = mlir::IntegerType::get(rewriter.getContext(), 64, mlir::IntegerType::Signless);
     VectorType vec_out = mlir::VectorType::get({8}, byte_type);
-    StringAttr t1 = rewriter.getStringAttr("sym_visibility");
-    StringAttr t2 = rewriter.getStringAttr("private");
-    NamedAttribute funcAccess = NamedAttribute(t1,t2);
-    FunctionType fn_type = mlir::FunctionType::get(rewriter.getContext(), TypeRange{vec_in}, TypeRange{vec_out});
-    func::FuncOp fn_op = rewriter.create<func::FuncOp>(moduleOp.getLoc(), funcName, fn_type, funcAccess);
+    //if the function is already declared, use the existing function, don't declare multiple times
+    if (fn_op_lookup != NULL){
+        fn_op = fn_op_lookup;
+    }
+    else{
+      StringAttr t1 = rewriter.getStringAttr("sym_visibility");
+      StringAttr t2 = rewriter.getStringAttr("private");
+      NamedAttribute funcAccess = NamedAttribute(t1,t2);
+      FunctionType fn_type = mlir::FunctionType::get(rewriter.getContext(), TypeRange{vec_in}, TypeRange{vec_out});
+      fn_op = rewriter.create<func::FuncOp>(moduleOp.getLoc(), funcName, fn_type, funcAccess);
+    }
 
     rewriter.setInsertionPoint(expOp);
 
