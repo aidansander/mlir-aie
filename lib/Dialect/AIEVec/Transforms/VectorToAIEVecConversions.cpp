@@ -452,6 +452,34 @@ static void generateAIEVecOpsForReductionOp(ConversionPatternRewriter &rewriter,
                                                  zeroConstOp.getResult());
 }
 
+static func::FuncOp getOrGenerateFuncOp(ConversionPatternRewriter &rewriter,
+                                        mlir::ModuleOp parentModuleOp,
+                                        StringRef funcName, TypeRange inTypes,
+                                        TypeRange outTypes) {
+
+  mlir::OpBuilder::InsertPoint saved_ip = rewriter.saveInsertionPoint();
+  rewriter.setInsertionPointToStart(
+      &parentModuleOp.getRegion().getBlocks().front());
+  SymbolTable st = SymbolTable(parentModuleOp);
+  func::FuncOp fn_op_lookup = st.lookup<func::FuncOp>(funcName);
+  func::FuncOp fn_op;
+  // if the function is already declared, use the existing function, don't
+  // declare multiple times
+  if (fn_op_lookup != NULL) {
+    fn_op = fn_op_lookup;
+  } else {
+    StringAttr t1 = rewriter.getStringAttr("sym_visibility");
+    StringAttr t2 = rewriter.getStringAttr("private");
+    NamedAttribute funcAccess = NamedAttribute(t1, t2);
+    FunctionType fn_type =
+        mlir::FunctionType::get(rewriter.getContext(), inTypes, outTypes);
+    fn_op = rewriter.create<func::FuncOp>(parentModuleOp.getLoc(), funcName,
+                                          fn_type, funcAccess);
+  }
+  rewriter.restoreInsertionPoint(saved_ip);
+  return fn_op;
+}
+
 //===----------------------------------------------------------------------===//
 // Rewrite patterns
 //===----------------------------------------------------------------------===//
@@ -1902,29 +1930,30 @@ struct ComputeExpOpByLUTLLVMPattern : OpConversionPattern<math::ExpOp> {
       return failure();
 
     StringRef funcName = "getExpBf16";
-    auto moduleOp = expOp->getParentOfType<mlir::ModuleOp>();
-    rewriter.setInsertionPointToStart(
-        &moduleOp.getRegion().getBlocks().front());
+    mlir::ModuleOp moduleOp = expOp->getParentOfType<mlir::ModuleOp>();
+    // rewriter.setInsertionPointToStart(
+    //     &moduleOp.getRegion().getBlocks().front());
 
-    SymbolTable st = SymbolTable(moduleOp);
-    func::FuncOp fn_op_lookup = st.lookup<func::FuncOp>(funcName);
+    // SymbolTable st = SymbolTable(moduleOp);
+    // func::FuncOp fn_op_lookup = st.lookup<func::FuncOp>(funcName);
 
-    func::FuncOp fn_op;
     VectorType v16bf16Ty = mlir::VectorType::get({16}, rewriter.getBF16Type());
     VectorType v8i64Ty = mlir::VectorType::get({8}, rewriter.getI64Type());
+    func::FuncOp fn_op = getOrGenerateFuncOp(
+        rewriter, moduleOp, funcName, TypeRange{v16bf16Ty}, TypeRange{v8i64Ty});
     // if the function is already declared, use the existing function, don't
     // declare multiple times
-    if (fn_op_lookup != NULL) {
-      fn_op = fn_op_lookup;
-    } else {
-      StringAttr t1 = rewriter.getStringAttr("sym_visibility");
-      StringAttr t2 = rewriter.getStringAttr("private");
-      NamedAttribute funcAccess = NamedAttribute(t1, t2);
-      FunctionType fn_type = mlir::FunctionType::get(
-          rewriter.getContext(), TypeRange{v16bf16Ty}, TypeRange{v8i64Ty});
-      fn_op = rewriter.create<func::FuncOp>(moduleOp.getLoc(), funcName,
-                                            fn_type, funcAccess);
-    }
+    // if (fn_op_lookup != NULL) {
+    //   fn_op = fn_op_lookup;
+    // } else {
+    //   StringAttr t1 = rewriter.getStringAttr("sym_visibility");
+    //   StringAttr t2 = rewriter.getStringAttr("private");
+    //   NamedAttribute funcAccess = NamedAttribute(t1, t2);
+    //   FunctionType fn_type = mlir::FunctionType::get(
+    //       rewriter.getContext(), TypeRange{v16bf16Ty}, TypeRange{v8i64Ty});
+    //   fn_op = rewriter.create<func::FuncOp>(moduleOp.getLoc(), funcName,
+    //                                         fn_type, funcAccess);
+    // }
 
     rewriter.setInsertionPoint(expOp);
 
@@ -2002,6 +2031,49 @@ struct ComputeExpOpByLUTPattern : OpConversionPattern<math::ExpOp> {
 //  %1 = arith.truncf %0 : f32 to bf16
 // to -
 //  %0 = emitc.call "getInvBf16"(%0) : f32 -> bf16;
+struct ComputeInvOpByLUTLLVMPattern : OpConversionPattern<arith::DivFOp> {
+  using OpConversionPattern::OpConversionPattern;
+
+  LogicalResult
+  matchAndRewrite(arith::DivFOp divOp, OpAdaptor adaptor,
+                  ConversionPatternRewriter &rewriter) const override {
+    Type srcType = adaptor.getLhs().getType();
+    if (!divOp->hasOneUse() || isa<VectorType>(srcType) ||
+        !isa<FloatType>(srcType))
+      return failure();
+
+    if (!isNarrowingOp(*divOp->getUsers().begin()))
+      return failure();
+
+    auto fType = cast<FloatType>(srcType);
+    if (fType.getWidth() != 32)
+      return failure();
+
+    auto constOp = dyn_cast<arith::ConstantOp>(divOp.getLhs().getDefiningOp());
+    if (!constOp ||
+        cast<FloatAttr>(constOp.getValue()).getValue().convertToDouble() !=
+            1.0f)
+      return failure();
+
+    StringRef funcName = "getInvBf16";
+    auto moduleOp = divOp->getParentOfType<mlir::ModuleOp>();
+    Type floatTy = rewriter.getF32Type();
+    Type bfloat16Ty = rewriter.getBF16Type();
+    func::FuncOp fn_op =
+        getOrGenerateFuncOp(rewriter, moduleOp, funcName, TypeRange{floatTy},
+                            TypeRange{bfloat16Ty});
+
+    auto truncOp = cast<arith::TruncFOp>(*divOp->getUsers().begin());
+
+    rewriter.setInsertionPoint(truncOp);
+    SmallVector<Value> invOperands = {adaptor.getRhs()};
+    rewriter.replaceOpWithNewOp<func::CallOp>(truncOp, fn_op, invOperands);
+    rewriter.eraseOp(divOp);
+
+    return success();
+  }
+};
+
 struct ComputeInvOpByLUTPattern : OpConversionPattern<arith::DivFOp> {
   using OpConversionPattern::OpConversionPattern;
 
@@ -3080,6 +3152,7 @@ static void populateAIEVecV2ConversionPatterns(RewritePatternSet &patterns,
       >(patterns.getContext(), 128, 1024, 256, 1024);
     patterns.add<
         ComputeExpOpByLUTPattern,
+        ComputeInvOpByLUTPattern,
         LowerVectorAddFOpToAIEVecAddElemOp,
         LowerVectorSubFOpToAIEVecSubElemOp,
         LowerVectorAddIOpToAIEVecAddElemOp,
@@ -3087,11 +3160,11 @@ static void populateAIEVecV2ConversionPatterns(RewritePatternSet &patterns,
       >(patterns.getContext());
   } else if (backend == TargetBackend::LLVMIR){
       patterns.add<
-      ComputeExpOpByLUTLLVMPattern
+      ComputeExpOpByLUTLLVMPattern,
+      ComputeInvOpByLUTLLVMPattern
       >(patterns.getContext());
   }
   patterns.add<
-      ComputeInvOpByLUTPattern,
       ComputeTanhOpByLUTPattern,
       ComputeSqrtOpPattern,
       ComputeRsqrtOpPattern,
