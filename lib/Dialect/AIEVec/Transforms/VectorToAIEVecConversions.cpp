@@ -2121,6 +2121,40 @@ struct ComputeInvOpByLUTPattern : OpConversionPattern<arith::DivFOp> {
   }
 };
 
+struct ComputeTanhOpByLUTLLVMPattern : OpConversionPattern<math::TanhOp> {
+  using OpConversionPattern::OpConversionPattern;
+
+  LogicalResult
+  matchAndRewrite(math::TanhOp tanhOp, OpAdaptor adaptor,
+                  ConversionPatternRewriter &rewriter) const override {
+    auto srcType = dyn_cast<VectorType>(tanhOp.getOperand().getType());
+    if (!srcType)
+      return failure();
+
+    Type scalarType = srcType.getElementType();
+    if (!isa<FloatType>(scalarType))
+      return failure();
+
+    unsigned laneSize = getVectorLaneSize(srcType);
+    unsigned elWidth = scalarType.getIntOrFloatBitWidth();
+    if (elWidth != 16 || laneSize != 16)
+      return failure();
+
+    StringRef funcName = "getTanhBf16";
+    auto moduleOp = tanhOp->getParentOfType<mlir::ModuleOp>();
+    VectorType v16bf16Ty = mlir::VectorType::get({16}, rewriter.getBF16Type());
+
+    func::FuncOp fn_op =
+        getOrGenerateFuncOp(rewriter, moduleOp, funcName, TypeRange{v16bf16Ty},
+                            TypeRange{v16bf16Ty});
+
+    rewriter.setInsertionPoint(tanhOp);
+    SmallVector<Value> tanhOperands = {adaptor.getOperand()};
+    rewriter.replaceOpWithNewOp<func::CallOp>(tanhOp, fn_op, tanhOperands);
+
+    return success();
+  }
+};
 // Convert math.tanh to a function call to compute tanh(x) by look up tables
 struct ComputeTanhOpByLUTPattern : OpConversionPattern<math::TanhOp> {
   using OpConversionPattern::OpConversionPattern;
@@ -3153,6 +3187,7 @@ static void populateAIEVecV2ConversionPatterns(RewritePatternSet &patterns,
     patterns.add<
         ComputeExpOpByLUTPattern,
         ComputeInvOpByLUTPattern,
+        ComputeTanhOpByLUTPattern,
         LowerVectorAddFOpToAIEVecAddElemOp,
         LowerVectorSubFOpToAIEVecSubElemOp,
         LowerVectorAddIOpToAIEVecAddElemOp,
@@ -3161,11 +3196,11 @@ static void populateAIEVecV2ConversionPatterns(RewritePatternSet &patterns,
   } else if (backend == TargetBackend::LLVMIR){
       patterns.add<
       ComputeExpOpByLUTLLVMPattern,
-      ComputeInvOpByLUTLLVMPattern
+      ComputeInvOpByLUTLLVMPattern,
+      ComputeTanhOpByLUTLLVMPattern
       >(patterns.getContext());
   }
   patterns.add<
-      ComputeTanhOpByLUTPattern,
       ComputeSqrtOpPattern,
       ComputeRsqrtOpPattern,
       ComputeErfOpPattern,
